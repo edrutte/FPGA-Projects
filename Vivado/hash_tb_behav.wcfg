@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="hash_tb_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="glbl" />
+            <top_module name="hash_tb" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="20.935423 us"></ZoomStartTime>
+      <ZoomEndTime time="73.812916 us"></ZoomEndTime>
+      <Cursor1Time time="65.000000 us"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="220"></NameColumnWidth>
+      <ValueColumnWidth column_width="81"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="6" />
+   <wvobject fp_name="/hash_tb/clk" type="logic">
+      <obj_property name="ElementShortName">clk</obj_property>
+      <obj_property name="ObjectShortName">clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/hash_tb/ash/hash" type="array">
+      <obj_property name="ElementShortName">hash[255:0]</obj_property>
+      <obj_property name="ObjectShortName">hash[255:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/hash_tb/ash/scroll/d_num" type="array">
+      <obj_property name="ElementShortName">d_num[15:0]</obj_property>
+      <obj_property name="ObjectShortName">d_num[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/hash_tb/ash/read[1]" type="logic">
+      <obj_property name="ElementShortName">[1]</obj_property>
+      <obj_property name="ObjectShortName">[1]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/hash_tb/ash/ap_done" type="logic">
+      <obj_property name="ElementShortName">ap_done</obj_property>
+      <obj_property name="ObjectShortName">ap_done</obj_property>
+   </wvobject>
+   <wvobject fp_name="/hash_tb/ash/scroll/lseg7/LED_out" type="array">
+      <obj_property name="ElementShortName">LED_out[6:0]</obj_property>
+      <obj_property name="ObjectShortName">LED_out[6:0]</obj_property>
+   </wvobject>
+</wave_config>
