@@ -1,2 +1,3 @@
-# sha256
-sha256 in VHDL using HLS from C
+# Projects
+* SHA256: SHA256 in VHDL using HLS from C
+* UART: VHDL UART implementation
