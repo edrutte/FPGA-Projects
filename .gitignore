@@ -1,7 +1,12 @@
+/**/.vitis_hls_log_all.xml
+/SHA256/Vitis/.project
 /**/vivado.log
 /**/vivado.jou
+/SHA256/Vitis/Debug/
+/**/.settings/
 /**/*.cache/
 /**/*.runs/
 /**/*.sim/
 /**/*.hw/
 /**/.Xil/
+/**/.apc/
