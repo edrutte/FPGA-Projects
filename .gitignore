@@ -1,4 +1,7 @@
+/**/vivado.log
+/**/vivado.jou
 /**/*.cache/
 /**/*.runs/
 /**/*.sim/
 /**/*.hw/
+/**/.Xil/
