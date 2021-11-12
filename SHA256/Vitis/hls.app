@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="com.autoesl.autopilot.project" top="sha256main">
+<project xmlns="com.autoesl.autopilot.project" top="sha256chunk">
   <files>
-    <file name="shalibHLS.c" sc="0" tb="false" cflags="" blackbox="false" csimflags=""/>
+    <file name="Vitis/csrc/shalibHLS.c" sc="0" tb="false" cflags="" blackbox="false" csimflags=""/>
   </files>
   <solutions>
     <solution name="First" status="active"/>

@@ -4,8 +4,8 @@
 ## Copyright 1986-2021 Xilinx, Inc. All Rights Reserved.
 ############################################################
 open_project Vitis
-set_top sha256main
-add_files shalibHLS.c
+set_top sha256chunk
+add_files Vitis/csrc/shalibHLS.c
 open_solution "First" -flow_target vivado
 set_part {xc7a100tftg256-1}
 create_clock -period 20 -name default

@@ -5,7 +5,7 @@
 
 #ifndef SMARTC_SHA256_H
 #define SMARTC_SHA256_H
-#define NO_SYNTH
+//#define NO_SYNTH
 
 #define NullChunk (Chunk_t) { .Chunk = {0, 0, 0, 0, 0, 0, 0, 0,\
 											 0, 0, 0, 0, 0, 0, 0, 0,\

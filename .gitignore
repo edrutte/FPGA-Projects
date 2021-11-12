@@ -1,10 +1,14 @@
 /**/.vitis_hls_log_all.xml
 /SHA256/Vitis/.project
-/**/vivado.log
 /**/vivado.jou
+/**/*.log
+/**/*.funcunit
+/SHA256/Vitis/*/*_data.json
 /SHA256/Vitis/Debug/
+/**/.autopilot/
 /**/.settings/
 /**/*.cache/
+/**/.debug/
 /**/*.runs/
 /**/*.sim/
 /**/*.hw/
