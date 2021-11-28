@@ -7,7 +7,7 @@ library ieee;
 use ieee.std_logic_1164.all; 
 use ieee.std_logic_unsigned.all;
 
-entity sha256chunk_Schedule_Schedule is 
+entity sha256chunk_Schedule_Schedule_1 is 
     generic(
             DataWidth     : integer := 32; 
             AddressWidth     : integer := 6; 
@@ -29,11 +29,11 @@ entity sha256chunk_Schedule_Schedule is
 end entity; 
 
 
-architecture rtl of sha256chunk_Schedule_Schedule is 
+architecture rtl of sha256chunk_Schedule_Schedule_1 is 
 
 signal address0_tmp : std_logic_vector(AddressWidth-1 downto 0); 
 type mem_array is array (0 to AddressRange-1) of std_logic_vector (DataWidth-1 downto 0); 
-shared variable ram : mem_array := (others=>(others=>'0'));
+shared variable ram : mem_array;
 
 
 begin 

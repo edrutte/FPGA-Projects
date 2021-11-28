@@ -40,6 +40,7 @@ architecture Behavioral of hash_tb is
 
 --signal hash : std_logic_vector (255 downto 0);
 signal clk : std_logic := '0';
+signal done : std_logic := '0';
 --signal hashrev : std_logic_vector (255 downto 0);
 --signal hashret : std_logic_vector (255 downto 0);
 --signal hashret2 : std_logic_vector (255 downto 0);
@@ -77,6 +78,13 @@ ash : entity work.sha256chunk_top
 	port map (
 	ap_clk => clk,
 	ap_rst => '0',
-	start => '1'
+	start => '1',
+	ap_done => done
 	);
+	
+done_proc : process (clk) is begin
+    if rising_edge(clk) then
+        assert done = '0' report "Hashing Finished";
+    end if;
+end process;
 end Behavioral;

@@ -32,7 +32,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity sha256chunk_top is
-	generic (num : INTEGER := 2);
+	generic (num : INTEGER := 1);
     Port ( ap_clk : in STD_LOGIC;
     	   ap_rst : IN STD_LOGIC;
     	   start : in std_logic;
@@ -45,17 +45,17 @@ end sha256chunk_top;
 
 architecture Behavioral of sha256chunk_top is
 type memtype is array (0 to num - 1) of std_logic_vector (511 downto 0);
-signal mem : memtype := (x"6162636462636465636465666465666765666768666768696768696a68696a6b696a6b6c6a6b6c6d6b6c6d6e6c6d6e6f6d6e6f706e6f70718000000000000000", x"000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001c0", others => (others => '0'));--x"61626380000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000018", others => (others => '0'));
+signal mem : memtype := (x"61626380000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000018", others => (others => '0'));--x"6162636462636465636465666465666765666768666768696768696a68696a6b696a6b6c6a6b6c6d6b6c6d6e6c6d6e6f6d6e6f706e6f70718000000000000000", x"000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001c0", others => (others => '0'));
 type lasttype is array (0 to num - 1) of std_logic_vector (255 downto 0);
 signal last : lasttype;
-signal lastinitrev : STD_LOGIC_VECTOR (255 downto 0);
-signal lastinit : STD_LOGIC_VECTOR (255 downto 0);
+signal initrev : STD_LOGIC_VECTOR (255 downto 0);
+signal init : STD_LOGIC_VECTOR (255 downto 0);
 signal read : std_logic_vector (0 to num - 1):= (others => '0');
 signal hash : STD_LOGIC_VECTOR (255 downto 0);
 signal red : std_logic := '0';
 begin
-lastinit <= x"6a09e667bb67ae853c6ef372a54ff53a510e527f9b05688c1f83d9ab5be0cd19";
-lastinitrev <= lastinit(31 downto 0) & lastinit(63 downto 32) & lastinit(95 downto 64) & lastinit(127 downto 96) & lastinit(159 downto 128) & lastinit(191 downto 160) & lastinit(223 downto 192) & lastinit(255 downto 224);
+init <= x"6a09e667bb67ae853c6ef372a54ff53a510e527f9b05688c1f83d9ab5be0cd19";
+initrev <= init(31 downto 0) & init(63 downto 32) & init(95 downto 64) & init(127 downto 96) & init(159 downto 128) & init(191 downto 160) & init(223 downto 192) & init(255 downto 224);
 ap_done <= read(num - 1);
 seg_dot <= '1';
 
@@ -67,7 +67,7 @@ shagen : for i in 0 to num - 1 generate
 				ap_rst => read(num - 1),
 				ap_start => start,
 				ap_ready => read(i),
-				LastHash => lastinitrev,
+				LastHash => initrev,
 				D => mem(i)(31 downto 0) & mem(i)(63 downto 32) & mem(i)(95 downto 64) & mem(i)(127 downto 96) & mem(i)(159 downto 128) & mem(i)(191 downto 160) & mem(i)(223 downto 192) & mem(i)(255 downto 224) & mem(i)(287 downto 256) & mem(i)(319 downto 288) & mem(i)(351 downto 320) & mem(i)(383 downto 352) & mem(i)(415 downto 384) & mem(i)(447 downto 416) & mem(i)(479 downto 448) & mem(i)(511 downto 480),
 				ap_return => last(i)
 			);
