@@ -118,21 +118,38 @@ signal ForwardAE, ForwardBE : std_logic_vector ( 1 downto 0 );
 
 signal RegSrcA, RegSrcB : std_logic_vector ( BIT_DEPTH - 1 downto 0 );
 
+component clk_wiz_0
+port
+ (-- Clock in ports
+  -- Clock out ports
+  clk_out1          : out    std_logic;
+  clkIn           : in     std_logic
+ );
+end component;
+
 begin
 
-slow_clk_proc : process (clk) is 
+--slow_clk_proc : process (clk) is 
 
-variable clk_divider : unsigned (1 downto 0) := (others => '0');
+--variable clk_divider : unsigned (1 downto 0) := (others => '0');
 
-begin
-	if rising_edge(clk) then
-		clk_divider := clk_divider + 1;
-		if clk_divider(0) = '1' then
-			clk_out1 <= not clk_out1;
-			clk_divider := (others => '0');
-		end if;
-	end if;
-end process;
+--begin
+	--if rising_edge(clk) then
+		--clk_divider := clk_divider + 1;
+		--if clk_divider(0) = '1' then
+			--clk_out1 <= not clk_out1;
+			--clk_divider := (others => '0');
+		--end if;
+	--end if;
+--end process;
+
+clk_div : clk_wiz_0
+   port map ( 
+  -- Clock out ports  
+   clk_out1 => clk_out1,
+   -- Clock in ports
+   clkIn => clk
+ );
 
 Fetch : entity work.InstructionFetch
 	Port map(

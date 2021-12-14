@@ -4,7 +4,8 @@ use IEEE.std_logic_1164.ALL;
 --use IEEE.NUMERIC_STD.ALL;
 
 entity Hazard is
-	Port ( RegWriteM  : in  std_logic;
+	Port ( 
+		RegWriteM : in  std_logic;
 		RegWriteW : in  std_logic;
 		MemtoReg  : in  std_logic;
 		RsD       : in  std_logic_vector ( 4 downto 0 );

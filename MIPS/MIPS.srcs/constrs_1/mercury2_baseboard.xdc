@@ -15,6 +15,7 @@ set_property BITSTREAM.GENERAL.COMPRESS TRUE [current_design]
 # on-board system oscillator
 set_property -dict {PACKAGE_PIN N14 IOSTANDARD LVCMOS33} [get_ports {clk}]
 #create_clock -add -name sys_clk_pin -period 20.00 -waveform {0 10} [get_ports clk]
+#create_generated_clock -name clk_div -source [get_ports clk] -divide_by 2 -add -master_clock [get_clocks  sys_clk_pin] [get_pins clk_out1_reg/Q]
 #set_property -dict {PACKAGE_PIN B5 IOSTANDARD LVCMOS33} [get_ports {ext_clk}]
 
 # on-board user LEDs
