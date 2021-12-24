@@ -60,21 +60,21 @@ constant tests : test_array :=(
 	(A => x"02155ABC", B => x"FFFF8DAC", OP => "1010", Y => x"021508AC"),
 	(A => x"12344321", B => x"55824231", OP => "0100", Y => x"67B68552"),
 	(A => x"7359AC12", B => x"00003291", OP => "0100", Y => x"7359DEA3"),
-	--(A => x"00004059", B => x"00009816", OP => "0110", Y => x"263A5FA6"),
-	--(A => x"0000A6DB", B => x"00000000", OP => "0110", Y => x"00000000"),
-	--(A => x"0000CAB9", B => x"00000001", OP => "0110", Y => x"0000CAB9"),
+	(A => x"00004059", B => x"00009816", OP => "0110", Y => x"263A5FA6"),
+	(A => x"0000A6DB", B => x"00000000", OP => "0110", Y => x"00000000"),
+	(A => x"0000CAB9", B => x"00000001", OP => "0110", Y => x"0000CAB9"),
 	(A => x"00007E62", B => x"0000FF38", OP => "0110", Y => x"7DFF4370"),
 	(A => x"0000DEC0", B => x"0000DED0", OP => "0110", Y => x"C1DF7C00"),
 	(A => x"FB5C9EEC", B => x"FC125888", OP => "1000", Y => x"FF5EDEEC"),
 	(A => x"E80FD2FB", B => x"00007952", OP => "1000", Y => x"E80FFBFB"),
 	(A => x"479D0B16", B => x"364482F6", OP => "1011", Y => x"71D989E0"),
 	(A => x"80CE94E0", B => x"00003C9D", OP => "1011", Y => x"80CEA87D"),
-	(A => x"D0C9F331", B => x"0000000E", OP => "1100", Y => x"7CCC4000"),
-	(A => x"FB2AD16D", B => x"00000010", OP => "1100", Y => x"D16D0000"),
-	(A => x"5431F3AF", B => x"00000009", OP => "1110", Y => x"002A18F9"),
-	(A => x"A6A59075", B => x"00000016", OP => "1110", Y => x"FFFFFE9A"),
-	(A => x"861EA09B", B => x"00000001", OP => "1101", Y => x"430F504D"),
-	(A => x"73B74FC3", B => x"0000001D", OP => "1101", Y => x"00000003"),
+	(B => x"D0C9F331", A => x"0000000E", OP => "1100", Y => x"7CCC4000"),
+	(B => x"FB2AD16D", A => x"00000010", OP => "1100", Y => x"D16D0000"),
+	(B => x"5431F3AF", A => x"00000009", OP => "1110", Y => x"002A18F9"),
+	(B => x"A6A59075", A => x"00000016", OP => "1110", Y => x"FFFFFE9A"),
+	(B => x"861EA09B", A => x"00000001", OP => "1101", Y => x"430F504D"),
+	(B => x"73B74FC3", A => x"0000001D", OP => "1101", Y => x"00000003"),
 	(A => x"1EB18E92", B => x"F21AC77A", OP => "0101", Y => x"2C96C718"),
 	(A => x"9E36B1FC", B => x"00003E8D", OP => "0101", Y => x"9E36736F")
 );
@@ -100,7 +100,7 @@ aluN_0 : alu4
 		OP <= tests(i).OP;
 			wait for 100 ns;
 			assert Y = tests(i).Y 
-				report "Expected: " & to_string(tests(i).Y) & " Got: " & to_string(Y)
+				report "Expected: " & to_string(tests(i).Y) & " Got: " & to_string(Y) & " OP: " & to_string(tests(i).OP)
 				severity error;
 		end loop;
 
