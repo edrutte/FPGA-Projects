@@ -14,11 +14,23 @@ signal s_1, s_2, s_3 : std_logic := '0';
 
 begin
 	
-	s_1 <= A and B; -- internal signal 1
-	s_2 <= A and Cin; -- internal signal 2
-	s_3 <= B and Cin; -- internal signal 3
-	Cout <= s_1 or s_2 or s_3; -- check carry
-	sum <= A xor B xor Cin; -- add bits
+	HAdder1 : entity work.HalfAdder
+		port map(
+			A => A,
+			B => B,
+			Cout => s_1,
+			Sum => s_2
+		);
+
+	HAdder2 : entity work.HalfAdder
+		port map(
+			A => Cin,
+			B => s_2,
+			Cout => s_3,
+			Sum => Sum
+		);
+
+	Cout <= s_1 or s_3;
 
 end;
 

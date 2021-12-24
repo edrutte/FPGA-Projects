@@ -28,8 +28,8 @@ begin
 					A(row) AND B(col);
 			end generate and_gates;
 			row_1_col_1: if row = 1 AND col = 1 generate
-				adder_1: entity work.FullAdder
-					port map (A => and_array(1)(0), B => and_array(0)(1), Cin => '0', Cout => carry_array(row)(col), Sum => add_array(row)(col));	
+				adder_1: entity work.HalfAdder
+					port map (A => and_array(1)(0), B => and_array(0)(1), Cout => carry_array(row)(col), Sum => add_array(row)(col));
 			 end generate row_1_col_1;
 			 row_1_col_n: if row = 1 AND col > 1 AND col < (BIT_DEPTH / 2) generate
 				adder_row_1_col_n: entity work.FullAdder
@@ -40,8 +40,8 @@ begin
 					port map (A => '0', B => and_array(col - row)(row), Cin => carry_array(row)(col - 1), Cout => carry_array(row)(col), Sum => add_array(row)(col));
 			 end generate row_1_col_last;
 			 row_n_col_1: if row > 1 AND row = col generate
-				adder_row_n_col_1: entity work.FullAdder
-					port map (A => add_array(row - 1)(col), B => and_array(col - row)(row), Cin => '0', Cout => carry_array(row)(col), Sum => add_array(row)(col));
+				adder_row_n_col_1: entity work.HalfAdder
+					port map (A => add_array(row - 1)(col), B => and_array(col - row)(row), Cout => carry_array(row)(col), Sum => add_array(row)(col));
 			 end generate row_n_col_1;
 			 row_n_col_n: if row > 1 AND col > row  AND col < (((BIT_DEPTH / 2) + row) - 1) generate
 				adder_row_n_col_n: entity work.FullAdder
