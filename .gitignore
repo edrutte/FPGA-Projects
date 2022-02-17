@@ -1,6 +1,8 @@
 /**/.vitis_hls_log_all.xml
 /SHA256/Vitis/.project
+/**/*.srcs/*/.*
 /**/*.jou
+/**/*.str
 /**/*.log
 /**/*.funcunit
 /SHA256/Vitis/*/*_data.json
