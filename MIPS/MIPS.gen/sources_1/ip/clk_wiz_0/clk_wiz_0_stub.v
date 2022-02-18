@@ -1,7 +1,7 @@
 // Copyright 1986-2021 Xilinx, Inc. All Rights Reserved.
 // --------------------------------------------------------------------------------
 // Tool Version: Vivado v.2021.1 (lin64) Build 3247384 Thu Jun 10 19:36:07 MDT 2021
-// Date        : Tue Dec 14 12:59:55 2021
+// Date        : Thu Feb 17 19:25:05 2022
 // Host        : Lappy running 64-bit Ubuntu 20.04.3 LTS
 // Command     : write_verilog -force -mode synth_stub
 //               /home/ghibif/FPGA-Projects/MIPS/MIPS.gen/sources_1/ip/clk_wiz_0/clk_wiz_0_stub.v
@@ -13,8 +13,8 @@
 // This empty module with port declaration file causes synthesis tools to infer a black box for IP.
 // The synthesis directives are for Synopsys Synplify support to prevent IO buffer insertion.
 // Please paste the declaration into a Verilog source file or add the file as an additional source.
-module clk_wiz_0(clk_out1, clkIn)
-/* synthesis syn_black_box black_box_pad_pin="clk_out1,clkIn" */;
+module clk_wiz_0(clk_out1, clkin)
+/* synthesis syn_black_box black_box_pad_pin="clk_out1,clkin" */;
   output clk_out1;
-  input clkIn;
+  input clkin;
 endmodule

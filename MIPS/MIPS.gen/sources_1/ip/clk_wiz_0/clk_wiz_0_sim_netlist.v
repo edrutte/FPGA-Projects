@@ -1,7 +1,7 @@
 // Copyright 1986-2021 Xilinx, Inc. All Rights Reserved.
 // --------------------------------------------------------------------------------
 // Tool Version: Vivado v.2021.1 (lin64) Build 3247384 Thu Jun 10 19:36:07 MDT 2021
-// Date        : Tue Dec 14 12:59:55 2021
+// Date        : Thu Feb 17 19:25:05 2022
 // Host        : Lappy running 64-bit Ubuntu 20.04.3 LTS
 // Command     : write_verilog -force -mode funcsim
 //               /home/ghibif/FPGA-Projects/MIPS/MIPS.gen/sources_1/ip/clk_wiz_0/clk_wiz_0_sim_netlist.v
@@ -15,30 +15,30 @@
 (* NotValidForBitStream *)
 module clk_wiz_0
    (clk_out1,
-    clkIn);
+    clkin);
   output clk_out1;
-  input clkIn;
+  input clkin;
 
-  (* IBUF_LOW_PWR *) wire clkIn;
   wire clk_out1;
+  (* IBUF_LOW_PWR *) wire clkin;
 
   clk_wiz_0_clk_wiz inst
-       (.clkIn(clkIn),
-        .clk_out1(clk_out1));
+       (.clk_out1(clk_out1),
+        .clkin(clkin));
 endmodule
 
 module clk_wiz_0_clk_wiz
    (clk_out1,
-    clkIn);
+    clkin);
   output clk_out1;
-  input clkIn;
+  input clkin;
 
-  wire clkIn;
-  wire clkIn_clk_wiz_0;
   wire clk_out1;
   wire clk_out1_clk_wiz_0;
   wire clkfbout_buf_clk_wiz_0;
   wire clkfbout_clk_wiz_0;
+  wire clkin;
+  wire clkin_clk_wiz_0;
   wire NLW_mmcm_adv_inst_CLKFBOUTB_UNCONNECTED;
   wire NLW_mmcm_adv_inst_CLKFBSTOPPED_UNCONNECTED;
   wire NLW_mmcm_adv_inst_CLKINSTOPPED_UNCONNECTED;
@@ -68,8 +68,8 @@ module clk_wiz_0_clk_wiz
   IBUF #(
     .IOSTANDARD("DEFAULT")) 
     clkin1_ibufg
-       (.I(clkIn),
-        .O(clkIn_clk_wiz_0));
+       (.I(clkin),
+        .O(clkin_clk_wiz_0));
   (* BOX_TYPE = "PRIMITIVE" *) 
   BUFG clkout1_buf
        (.I(clk_out1_clk_wiz_0),
@@ -82,7 +82,7 @@ module clk_wiz_0_clk_wiz
     .CLKFBOUT_USE_FINE_PS("FALSE"),
     .CLKIN1_PERIOD(20.000000),
     .CLKIN2_PERIOD(0.000000),
-    .CLKOUT0_DIVIDE_F(25.000000),
+    .CLKOUT0_DIVIDE_F(10.000000),
     .CLKOUT0_DUTY_CYCLE(0.500000),
     .CLKOUT0_PHASE(0.000000),
     .CLKOUT0_USE_FINE_PS("FALSE"),
@@ -129,7 +129,7 @@ module clk_wiz_0_clk_wiz
         .CLKFBOUT(clkfbout_clk_wiz_0),
         .CLKFBOUTB(NLW_mmcm_adv_inst_CLKFBOUTB_UNCONNECTED),
         .CLKFBSTOPPED(NLW_mmcm_adv_inst_CLKFBSTOPPED_UNCONNECTED),
-        .CLKIN1(clkIn_clk_wiz_0),
+        .CLKIN1(clkin_clk_wiz_0),
         .CLKIN2(1'b0),
         .CLKINSEL(1'b1),
         .CLKINSTOPPED(NLW_mmcm_adv_inst_CLKINSTOPPED_UNCONNECTED),

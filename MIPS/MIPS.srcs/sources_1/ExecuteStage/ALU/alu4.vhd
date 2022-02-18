@@ -116,9 +116,11 @@ sra_comp: sraN
 	port map ( A => B, SHIFT_AMT => A (4 downto 0), Y => sra_result );
 
 add_comp: entity work.Adder
+	generic map(USE_STRUCTURAL_ARCH => false)
 	port map (A => A, B => B, OP => OP (0), Sum => add_result);
 
 mult_comp: entity work.Multiplier
+	generic map(USE_STRUCTURAL_ARCH => false)
 	port map(A => A (15 downto 0), B => B (15 downto 0), Product => mul_result);
 	-- Use OP to control which operation to show/perform
 
