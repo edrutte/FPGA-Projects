@@ -36,6 +36,6 @@ begin
 			end generate add_i;
 		end generate gen_add;
 	else generate
-		Sum <= std_logic_vector(unsigned(A) + unsigned(OpB));
+		Sum <= std_logic_vector(unsigned(A) + unsigned(OpB) + OP);
 	end generate struct_gen;
 end SomeRandomName;
