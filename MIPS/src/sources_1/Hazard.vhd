@@ -29,9 +29,9 @@ signal lwStall : std_logic;
 begin
 
 ForwardAE_proc : process (RsE, RegWriteM, RegWriteW, WriteRegM, WriteRegW) is begin
-	if RsE /= 5x"0" and RsE = WriteRegM and RegWriteM = '1' then
+	if RsE /= "00000" and RsE = WriteRegM and RegWriteM = '1' then
 		ForwardAE <= "10";
-	elsif RsE /= 5x"0" and RsE = WriteRegW and RegWriteW = '1' then
+	elsif RsE /= "00000" and RsE = WriteRegW and RegWriteW = '1' then
 		ForwardAE <= "01";
 	else
 		ForwardAE <= "00";
@@ -39,9 +39,9 @@ ForwardAE_proc : process (RsE, RegWriteM, RegWriteW, WriteRegM, WriteRegW) is be
 end process;
 
 ForwardBE_proc : process (RtE, RegWriteM, RegWriteW, WriteRegM, WriteRegW) is begin
-	if RtE /= 5x"0" and RtE = WriteRegM and RegWriteM = '1' then
+	if RtE /= "00000" and RtE = WriteRegM and RegWriteM = '1' then
 		ForwardBE <= "10";
-	elsif RtE /= 5x"0" and RtE = WriteRegW and RegWriteW = '1' then
+	elsif RtE /= "00000" and RtE = WriteRegW and RegWriteW = '1' then
 		ForwardBE <= "01";
 	else
 		ForwardBE <= "00";

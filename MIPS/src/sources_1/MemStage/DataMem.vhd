@@ -22,7 +22,7 @@ signal data_mem : mem_type := (others => (others => '0'));
 
 begin
 
-seven_seg_proc : process (all) is begin
+seven_seg_proc : process (clk) is begin
 	if rising_edge(clk) then
 		if w_en = '1' then
 			case addr is
@@ -33,10 +33,10 @@ seven_seg_proc : process (all) is begin
 	end if;
 end process;
 
-store_proc : process ( clk ) is begin
-	if rising_edge ( clk ) then
+store_proc : process (clk) is begin
+	if rising_edge(clk) then
 		if w_en = '1' then
-			data_mem ( to_integer ( unsigned ( addr ) ) ) <= d_in;
+			data_mem(to_integer(unsigned(addr))) <= d_in;
 		end if;
 	end if;
 end process;

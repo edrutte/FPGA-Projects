@@ -23,7 +23,7 @@ signal mem_data : mem_data_type := (others => (others => '0'));
 
 begin
 
-mem_proc : process (all) is begin
+mem_proc : process (clk_n) is begin
 	if falling_edge(clk_n) then
 		if we = '1' then
 			mem_data(to_integer(unsigned(Addr3))) <= wd;

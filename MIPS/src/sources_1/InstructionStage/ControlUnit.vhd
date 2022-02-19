@@ -20,7 +20,7 @@ architecture SomeRandomName of ControlUnit is
 
 begin
 
-RegWrite_proc : process (all) is begin
+RegWrite_proc : process (Opcode) is begin
 	if Opcode = "101011" then
 		RegWrite <= '0';
 	else
@@ -28,7 +28,7 @@ RegWrite_proc : process (all) is begin
 	end if;
 end process;
 	
-MemtoReg_proc : process (all) is begin
+MemtoReg_proc : process (Opcode) is begin
 	if Opcode = "100011" then
 		MemtoReg <= '1';
 	else
@@ -36,7 +36,7 @@ MemtoReg_proc : process (all) is begin
 	end if;
 end process;
 	
-MemWrite_proc :process (all) is begin
+MemWrite_proc :process (Opcode) is begin
 	if Opcode = "101011" then
 		MemWrite <= '1';
 	else
@@ -44,7 +44,7 @@ MemWrite_proc :process (all) is begin
 	end if;
 end process;
 	
-ALUControl_proc : process (all) is begin
+ALUControl_proc : process (Opcode, Funct) is begin
 	case Opcode is
 		when "001000" | "101011" | "100011" => ALUControl <= "0100";
 		when "001100" => ALUControl <= "1010";
@@ -67,7 +67,7 @@ ALUControl_proc : process (all) is begin
 	end case;
 end process;
 	
-ALUSrc_proc : process (all) is begin
+ALUSrc_proc : process (Opcode) is begin
 	if Opcode = "000000" then
 		ALUSrc <= '0';
 	else
@@ -75,7 +75,7 @@ ALUSrc_proc : process (all) is begin
 	end if;
 end process;
 	
-RegDst_proc : process (all) is begin
+RegDst_proc : process (Opcode) is begin
 	if Opcode = "000000" then
 		RegDst <= '1';
 	else

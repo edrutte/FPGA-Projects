@@ -30,7 +30,7 @@ mem : InstructionMem
 		d_out => Instruction
 	);
 				 
-fetch_proc : process (all) is begin
+fetch_proc : process (rst, StallF, clk) is begin
 	if rst = '1' then
 		addr <= (others => '0');
 	elsif StallF = '0' then

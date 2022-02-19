@@ -89,7 +89,7 @@ signal mem_data : mem_data_type :=
 	);
 begin
 
-mem_proc : process (all) is begin
+mem_proc : process (addr) is begin
 	if addr(27 downto 10) = std_logic_vector(to_unsigned(0, 18)) then
 		d_out <= mem_data(to_integer(unsigned(std_logic_vector'(addr(9 downto 2) & "00"))))&
 			mem_data(to_integer(unsigned(std_logic_vector'(addr(9 downto 2) & "01"))))&
