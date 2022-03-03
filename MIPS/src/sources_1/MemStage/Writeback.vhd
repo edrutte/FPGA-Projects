@@ -4,12 +4,9 @@ use work.globals.all;
 
 entity Writeback is
 	Port(
-		WriteReg            : in  std_logic_vector ( LOG_PORT_DEPTH - 1 downto 0 );
-		RegWrite, MemtoReg  : in  std_logic;
+		MemtoReg            : in  std_logic;
 		ALUResult, ReadData : in  std_logic_vector ( BIT_DEPTH - 1 downto 0 );
-		Result              : out std_logic_vector ( BIT_DEPTH - 1 downto 0 );
-		WriteRegOut         : out std_logic_vector ( LOG_PORT_DEPTH - 1 downto 0 );
-		RegWriteOut         : out std_logic
+		Result              : out std_logic_vector ( BIT_DEPTH - 1 downto 0 )
 	);
 end entity;
 
@@ -24,8 +21,5 @@ WbData_proc : process (ReadData, MemtoReg, ALUResult) is begin
 		Result <= ALUResult;
 	end if;
 end process;
-
-WriteRegOut <= WriteReg;
-RegWriteOut <= RegWrite;
 
 end;

@@ -7,18 +7,11 @@ use work.globals.all;
 entity MemStage is
 	Port ( 
 		clk          : in  std_logic;
-		RegWrite     : in  std_logic;
-		MemtoReg     : in  std_logic;
 		MemWrite     : in  std_logic;
 		ALUResult    : in  std_logic_vector ( BIT_DEPTH - 1 downto 0 );
 		WriteData    : in  std_logic_vector ( BIT_DEPTH - 1 downto 0 );
 		switches     : in  std_logic_vector ( NUM_SWITCHES - 1 downto 0 );
-		WriteReg     : in  std_logic_vector ( LOG_PORT_DEPTH - 1 downto 0 );
-		RegWriteOut  : out std_logic;
-		MemtoRegOut  : out std_logic;
-		WriteRegOut  : out std_logic_vector ( LOG_PORT_DEPTH - 1 downto 0 );
 		MemOut       : out std_logic_vector ( BIT_DEPTH - 1 downto 0 );
-		ALUResultOut : out std_logic_vector ( BIT_DEPTH - 1 downto 0 );
 		active_digit : out std_logic_vector ( 3 downto 0 );
 		seven_seg    : out std_logic_vector ( 6 downto 0 )
 	);
@@ -57,10 +50,5 @@ sev_seg : seg7
 		Anode_Activate   => active_digit,
 		LED_out          => seven_seg
 	);
-
-RegWriteOut  <= RegWrite;
-MemtoRegOut  <= MemtoReg;
-WriteRegOut  <= WriteReg;
-ALUResultOut <= ALUResult;
 
 end Behavioral;
