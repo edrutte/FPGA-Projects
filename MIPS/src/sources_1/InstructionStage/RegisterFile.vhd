@@ -26,14 +26,16 @@ begin
 mem_proc : process (clk_n) is begin
 	if falling_edge(clk_n) then
 		if we = '1' then
-			mem_data(to_integer(unsigned(Addr3))) <= wd;
+			if to_integer(unsigned(Addr3)) /= 0 then
+				mem_data(to_integer(unsigned(Addr3))) <= wd;
+			end if;
 		end if;
 	end if;
 end process;
 
-RD1 <= (others => '0') when to_integer(unsigned(Addr1)) = 0 else
-	mem_data(to_integer(unsigned(Addr1))); 
-RD2 <= (others => '0') when to_integer(unsigned(Addr2)) = 0 else
-	mem_data(to_integer(unsigned(Addr2)));	
+
+RD1 <= mem_data(to_integer(unsigned(Addr1)));
+
+RD2 <= mem_data(to_integer(unsigned(Addr2)));
 
 end FileRegister;

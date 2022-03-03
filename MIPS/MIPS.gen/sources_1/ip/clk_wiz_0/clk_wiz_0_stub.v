@@ -1,10 +1,10 @@
 // Copyright 1986-2021 Xilinx, Inc. All Rights Reserved.
 // --------------------------------------------------------------------------------
 // Tool Version: Vivado v.2021.1 (lin64) Build 3247384 Thu Jun 10 19:36:07 MDT 2021
-// Date        : Thu Feb 17 19:25:05 2022
+// Date        : Thu Feb 17 19:25:04 2022
 // Host        : Lappy running 64-bit Ubuntu 20.04.3 LTS
-// Command     : write_verilog -force -mode synth_stub
-//               /home/ghibif/FPGA-Projects/MIPS/MIPS.gen/sources_1/ip/clk_wiz_0/clk_wiz_0_stub.v
+// Command     : write_verilog -force -mode synth_stub -rename_top clk_wiz_0 -prefix
+//               clk_wiz_0_ clk_wiz_0_stub.v
 // Design      : clk_wiz_0
 // Purpose     : Stub declaration of top-level module interface
 // Device      : xc7a100tftg256-1

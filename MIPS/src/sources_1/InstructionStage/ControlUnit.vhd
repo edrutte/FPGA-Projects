@@ -21,11 +21,10 @@ architecture SomeRandomName of ControlUnit is
 begin
 
 RegWrite_proc : process (Opcode) is begin
-	if Opcode = "101011" then
-		RegWrite <= '0';
-	else
-		RegWrite <= '1';
-	end if;
+	case Opcode is
+		when "101011" | "000001" | "000101" | "000111" | "000110" | "000100" => RegWrite <= '0';
+		when others => RegWrite <= '1';
+	end case;
 end process;
 	
 MemtoReg_proc : process (Opcode) is begin

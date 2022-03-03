@@ -1,6 +1,6 @@
 /**/.vitis_hls_log_all.xml
 /SHA256/Vitis/.project
-/**/*.srcs/*/.*
+/**/*src*/*/.*
 /**/*.jou
 /**/*.str
 /**/*.log

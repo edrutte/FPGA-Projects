@@ -1,10 +1,10 @@
 // Copyright 1986-2021 Xilinx, Inc. All Rights Reserved.
 // --------------------------------------------------------------------------------
 // Tool Version: Vivado v.2021.1 (lin64) Build 3247384 Thu Jun 10 19:36:07 MDT 2021
-// Date        : Thu Feb 17 19:25:05 2022
+// Date        : Thu Feb 17 19:25:04 2022
 // Host        : Lappy running 64-bit Ubuntu 20.04.3 LTS
-// Command     : write_verilog -force -mode funcsim
-//               /home/ghibif/FPGA-Projects/MIPS/MIPS.gen/sources_1/ip/clk_wiz_0/clk_wiz_0_sim_netlist.v
+// Command     : write_verilog -force -mode funcsim -rename_top clk_wiz_0 -prefix
+//               clk_wiz_0_ clk_wiz_0_sim_netlist.v
 // Design      : clk_wiz_0
 // Purpose     : This verilog netlist is a functional simulation representation of the design and should not be modified
 //               or synthesized. This netlist cannot be used for SDF annotated simulation.
@@ -22,12 +22,12 @@ module clk_wiz_0
   wire clk_out1;
   (* IBUF_LOW_PWR *) wire clkin;
 
-  clk_wiz_0_clk_wiz inst
+  clk_wiz_0_clk_wiz_0_clk_wiz inst
        (.clk_out1(clk_out1),
         .clkin(clkin));
 endmodule
 
-module clk_wiz_0_clk_wiz
+module clk_wiz_0_clk_wiz_0_clk_wiz
    (clk_out1,
     clkin);
   output clk_out1;

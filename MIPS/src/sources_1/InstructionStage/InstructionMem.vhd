@@ -49,42 +49,56 @@ signal mem_data : mem_data_type :=
 		--x"8d", x"6c", x"00", x"00", --lw $t4, 0x0($t3)
 ----------------------------------------------------------------------
 ----------------------first 10 fib nums-------------------------------
+		--x"20", x"10", x"00", x"00", --addi $s0, $zero, 0x0 ;save pointer
+		--x"20", x"11", x"10", x"23", --addi $s1, $zero, 0x1023 ;7seg pointer
+		--x"20", x"08", x"00", x"00", --addi $t0, $zero, 0x0 ;fib(0) = 0
+		--x"20", x"09", x"00", x"01", --addi $t1, $zero, 0x1 ;fib(1) = 1
+		--x"01", x"28", x"40", x"20", --add $t0, $t1, $t0 ;next fib
+		--x"ae", x"08", x"00", x"00", --sw $t0, 0x0($s0) ;store
+		--x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1 ;store pointer++
+		--x"01", x"28", x"48", x"20", --add $t1, $t1, $t0 ;next fib
+		--x"ae", x"09", x"00", x"00", --sw $t1, 0x0($s0) ;store
+		--x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1 ;store pointer++
+		--x"01", x"28", x"40", x"20", --add $t0, $t1, $t0 ;next fib
+		--x"ae", x"08", x"00", x"00", --sw $t0, 0x0($s0) ;store
+		--x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1 ;store pointer++
+		--x"01", x"28", x"48", x"20", --add $t1, $t1, $t0 ;next fib
+		--x"ae", x"09", x"00", x"00", --sw $t1, 0x0($s0) ;store
+		--x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1 ;store pointer++
+		--x"01", x"28", x"40", x"20", --add $t0, $t1, $t0 ;next fib
+		--x"ae", x"08", x"00", x"00", --sw $t0, 0x0($s0) ;store
+		--x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1 ;store pointer++
+		--x"01", x"28", x"48", x"20", --add $t1, $t1, $t0 ;next fib
+		--x"ae", x"09", x"00", x"00", --sw $t1, 0x0($s0) ;store
+		--x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1 ;store pointer++
+		--x"01", x"28", x"40", x"20", --add $t0, $t1, $t0 ;next fib
+		--x"ae", x"08", x"00", x"00", --sw $t0, 0x0($s0) ;store
+		--x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1 ;store pointer++
+		--x"01", x"28", x"48", x"20", --add $t1, $t1, $t0 ;next fib
+		--x"ae", x"09", x"00", x"00", --sw $t1, 0x0($s0) ;store
+		--x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1 ;store pointer++
+		--x"01", x"28", x"40", x"20", --add $t0, $t1, $t0 ;next fib
+		--x"ae", x"08", x"00", x"00", --sw $t0, 0x0($s0) ;store
+		--x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1 ;store pointer++
+		--x"01", x"28", x"48", x"20", --add $t1, $t1, $t0 ;next fib
+		--x"ae", x"09", x"00", x"00", --sw $t1, 0x0($s0) ;store
+		--x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1 ;store pointer++
+		--x"ae", x"29", x"00", x"00", --sw $t1 0x0($s1) ;store to 7seg
+----------------------------------------------------------------------
+----------------------first 10 fib nums using branch------------------
 		x"20", x"10", x"00", x"00", --addi $s0, $zero, 0x0 ;save pointer
 		x"20", x"11", x"10", x"23", --addi $s1, $zero, 0x1023 ;7seg pointer
+		x"20", x"12", x"00", x"0a", --addi $s2, $zero, 0xa ;Num fibs to calculate
 		x"20", x"08", x"00", x"00", --addi $t0, $zero, 0x0 ;fib(0) = 0
 		x"20", x"09", x"00", x"01", --addi $t1, $zero, 0x1 ;fib(1) = 1
 		x"01", x"28", x"40", x"20", --add $t0, $t1, $t0 ;next fib
 		x"ae", x"08", x"00", x"00", --sw $t0, 0x0($s0) ;store
 		x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1 ;store pointer++
+		x"12", x"50", x"00", x"04", --beq $s2, $s0, 0x4 ; check if done
 		x"01", x"28", x"48", x"20", --add $t1, $t1, $t0 ;next fib
 		x"ae", x"09", x"00", x"00", --sw $t1, 0x0($s0) ;store
 		x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1 ;store pointer++
-		x"01", x"28", x"40", x"20", --add $t0, $t1, $t0 ;next fib
-		x"ae", x"08", x"00", x"00", --sw $t0, 0x0($s0) ;store
-		x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1 ;store pointer++
-		x"01", x"28", x"48", x"20", --add $t1, $t1, $t0 ;next fib
-		x"ae", x"09", x"00", x"00", --sw $t1, 0x0($s0) ;store
-		x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1 ;store pointer++
-		x"01", x"28", x"40", x"20", --add $t0, $t1, $t0 ;next fib
-		x"ae", x"08", x"00", x"00", --sw $t0, 0x0($s0) ;store
-		x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1 ;store pointer++
-		x"01", x"28", x"48", x"20", --add $t1, $t1, $t0 ;next fib
-		x"ae", x"09", x"00", x"00", --sw $t1, 0x0($s0) ;store
-		x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1 ;store pointer++
-		x"01", x"28", x"40", x"20", --add $t0, $t1, $t0 ;next fib
-		x"ae", x"08", x"00", x"00", --sw $t0, 0x0($s0) ;store
-		x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1 ;store pointer++
-		x"01", x"28", x"48", x"20", --add $t1, $t1, $t0 ;next fib
-		x"ae", x"09", x"00", x"00", --sw $t1, 0x0($s0) ;store
-		x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1 ;store pointer++
-		x"01", x"28", x"40", x"20", --add $t0, $t1, $t0 ;next fib
-		x"ae", x"08", x"00", x"00", --sw $t0, 0x0($s0) ;store
-		x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1 ;store pointer++
-		x"01", x"28", x"48", x"20", --add $t1, $t1, $t0 ;next fib
-		x"ae", x"09", x"00", x"00", --sw $t1, 0x0($s0) ;store
-		x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1 ;store pointer++
-		x"ae", x"29", x"00", x"00", --sw $t1 0x0($s1) ;store to 7seg
-		
+		x"16", x"50", x"ff", x"f8", --bne $s2, $s0, -0x8 ; loop if not done
 		others => (others => '0')
 	);
 begin

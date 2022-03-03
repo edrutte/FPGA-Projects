@@ -46,30 +46,25 @@ signal RegWriteE : std_logic;
 signal RegWriteM : std_logic;
 signal RegWriteW : std_logic;
 
-signal RegWriteOutE : std_logic;
-signal RegWriteOutM : std_logic;
-signal RegWriteOutW : std_logic;
-
 signal WriteRegE : std_logic_vector ( LOG_Port_DEPTH - 1 downto 0 );
 signal WriteRegM : std_logic_vector ( LOG_Port_DEPTH - 1 downto 0 );
 signal WriteRegW : std_logic_vector ( LOG_Port_DEPTH - 1 downto 0 );
-
-signal WriteRegOutM : std_logic_vector ( LOG_Port_DEPTH - 1 downto 0 );
-signal WriteRegOutW : std_logic_vector ( LOG_Port_DEPTH - 1 downto 0 );
 
 signal MemtoRegD : std_logic;
 signal MemtoRegE : std_logic;
 signal MemtoRegM : std_logic;
 signal MemtoRegW : std_logic;
 
-signal MemtoRegOutE : std_logic;
-signal MemtoRegOutM : std_logic;
-
 signal MemWriteD : std_logic;
 signal MemWriteE : std_logic;
 signal MemWriteM : std_logic;
 
-signal MemWriteOutE : std_logic;
+signal BranchD : std_logic;
+
+signal PCPlus4F : std_logic_vector(27 downto 0);
+signal PCPlus4D : std_logic_vector(27 downto 0);
+
+signal PCBranchD : std_logic_vector(27 downto 0);
 
 signal ALUControlD : std_logic_vector ( 3 downto 0 );
 signal ALUControlE : std_logic_vector ( 3 downto 0 );
@@ -102,8 +97,6 @@ signal ALUResultE : std_logic_vector ( BIT_DEPTH - 1 downto 0 );
 signal ALUResultM : std_logic_vector ( BIT_DEPTH - 1 downto 0 );
 signal ALUResultW : std_logic_vector ( BIT_DEPTH - 1 downto 0 );
 
-signal ALUResultOutM : std_logic_vector ( BIT_DEPTH - 1 downto 0 );
-
 signal WriteDataE : std_logic_vector ( BIT_DEPTH - 1 downto 0 );
 signal WriteDataM : std_logic_vector ( BIT_DEPTH - 1 downto 0 );
 
@@ -114,17 +107,17 @@ signal result : std_logic_vector ( BIT_DEPTH - 1 downto 0 );
 
 signal StallF, StallD, FlushE : std_logic;
 
+signal ForwardAD, ForwardBD : std_logic;
+
 signal ForwardAE, ForwardBE : std_logic_vector ( 1 downto 0 );
 
 signal RegSrcA, RegSrcB : std_logic_vector ( BIT_DEPTH - 1 downto 0 );
 
 component clk_wiz_0
-port
- (-- Clock in ports
-  -- Clock out ports
-  clk_out1          : out    std_logic;
-  clkIn           : in     std_logic
- );
+	port(
+		clk_out1          : out    std_logic;
+		clkIn             : in     std_logic
+	);
 end component;
 
 begin
@@ -156,7 +149,10 @@ Fetch : entity work.InstructionFetch
 		clk         => clk_out1,
 		rst         => rst_debounce,
 		StallF      => StallF,
-		Instruction => fetchOut
+		PCSrc       => BranchD,
+		PCBranch    => PCBranchD,
+		Instruction => fetchOut,
+		PCPlus4     => PCPlus4F
 	);
 
 Debouncer : entity work.debounce
@@ -169,14 +165,19 @@ Debouncer : entity work.debounce
 
 Decode : entity work.InstructionDecode
 	Port map(
-		clk          => clk_out1,
+		clk_n        => clk_out1,
 		Instruction  => decodeIn,
-		RegWriteAddr => WriteRegOutW,
+		RegWriteAddr => WriteRegW,
 		RegWriteData => result,
-		RegWriteEn   => RegWriteOutW,
+		CmpData      => ALUResultM,
+		PCPlus4      => PCPlus4D,
+		RegWriteEn   => RegWriteW,
+		ForwardAD    => ForwardAD,
+		ForwardBD    => ForwardBD,
 		RegWrite     => RegWriteD,
 		MemtoReg     => MemtoRegD,
 		MemWrite     => MemWriteD,
+		Branch       => BranchD,
 		ALUControl   => ALUControlD,
 		ALUSrc       => ALUSrcD,
 		RegDst       => RegDstD,
@@ -185,7 +186,8 @@ Decode : entity work.InstructionDecode
 		RtDest       => RtD,
 		RdDest       => RdD,
 		Rs           => RsD,
-		ImmOut       => ImmD
+		ImmOut       => ImmD,
+		PCBranch     => PCBranchD
 	);
 	    
 Hazard : entity work.Hazard
@@ -197,13 +199,19 @@ Hazard : entity work.Hazard
 		StallF    => StallF,
 		StallD    => StallD,
 		FlushE    => FlushE,
-		MemtoReg  => MemtoRegE,
+		MemtoRegE => MemtoRegE,
+		MemtoRegM => MemToRegM,
+		BranchD   => BranchD,
+		WriteRegE => WriteRegE,
 		WriteRegM => WriteRegM,
 		WriteRegW => WriteRegW,
+		RegWriteE => RegWriteE,
 		RegWriteM => RegWriteM,
 		RegWriteW => RegWriteW,
 		ForwardAE => ForwardAE,
-		ForwardBE => ForwardBE
+		ForwardBE => ForwardBE,
+		ForwardAD => ForwardAD,
+		ForwardBD => ForwardBD
 	);
 
 RegSrcA_proc : process (ForwardAE, RD1E, result, ALUResultM) is begin
@@ -226,9 +234,6 @@ end process;
 
 Execute : entity work.Execute
 	Port map(
-		RegWrite    => RegWriteE,
-		MemtoReg    => MemtoRegE,
-		MemWrite    => MemWriteE,
 		ALUControl  => ALUControlE,
 		ALUSrc      => ALUSrcE,
 		RegDst      => RegDstE,
@@ -237,9 +242,6 @@ Execute : entity work.Execute
 		RtDest      => RtE,
 		RdDest      => RdE,
 		SignImm     => ImmE,
-		RegWriteOut => RegWriteOutE,
-		MemtoRegOut => MemtoRegOutE,
-		MemWriteOut => MemWriteOutE,
 		ALUResult   => ALUResultE,
 		WriteData   => WriteDataE,
 		WriteReg    => WriteRegE
@@ -248,45 +250,35 @@ Execute : entity work.Execute
 Mem : entity work.MemStage
 	Port map(
 		clk                      => clk_out1,
-		RegWrite                 => RegWriteM,
-		MemtoReg                 => MemtoRegM,
-		WriteReg                 => WriteRegM,
 		MemWrite                 => MemWriteM,
 		ALUResult                => ALUResultM,
 		WriteData                => WriteDataM,
 		switches                 => swNoMeta,
-		RegWriteOut              => RegWriteOutM,
-		MemtoRegOut              => MemtoRegOutM,
-		WriteRegOut              => WriteRegOutM,
 		MemOut                   => MemOutM,
-		ALUResultOut             => ALUResultOutM,
 		active_digit             => an_7seg,
-		seven_seg ( 6 downto 0 ) => ag_seg
+		seven_seg (6 downto 0)   => ag_seg
 	);
 
 Wb : entity work.Writeback
 	Port map(
-		WriteReg    => WriteRegW,
-		RegWrite    => RegWriteW,
 		MemtoReg    => MemtoRegW,
 		ALUResult   => ALUResultW,
 		ReadData    => MemOutW,
-		Result      => result,
-		WriteRegOut => WriteRegOutW,
-		RegWriteOut => RegWriteOutW
+		Result      => result
 	);
 
 stageDiv : process (clk_out1) is begin
 	if rising_edge(clk_out1) then
-		MemtoRegM   <= MemtoRegOutE;
-		MemtoRegW   <= MemtoRegOutM;
-		MemWriteM   <= MemWriteOutE;
-		RegWriteW   <= RegWriteOutM;
+		RegWriteM   <= RegWriteE;
+		MemtoRegM   <= MemtoRegE;
+		MemtoRegW   <= MemtoRegM;
+		MemWriteM   <= MemWriteE;
+		RegWriteW   <= RegWriteM;
 		ALUResultM  <= ALUResultE;
-		ALUResultW  <= ALUResultOutM;
+		ALUResultW  <= ALUResultM;
 		WriteDataM  <= WriteDataE;
 		WriteRegM   <= WriteRegE;
-		WriteRegW   <= WriteRegOutM;
+		WriteRegW   <= WriteRegM;
 		MemOutW     <= MemOutM;
 		swMeta      <= sw;
 		swNoMeta    <= swMeta;
@@ -295,10 +287,16 @@ stageDiv : process (clk_out1) is begin
 	end if;
 end process;
 
-D_reg : process (clk_out1, StallD) is begin
-	if StallD = '0' then
-		if rising_edge(clk_out1) then
-			decodeIn <= fetchOut;
+D_reg : process (clk_out1) is begin
+	if rising_edge(clk_out1) then
+		if StallD = '0' then
+			if BranchD = '1' then
+				decodeIn <= (others => '0');
+				PCPlus4D <= (others => '0');
+			else
+				decodeIn <= fetchOut;
+				PCPlus4D <= PCPlus4F;
+			end if;
 		end if;
 	end if;
 end process;
@@ -307,7 +305,6 @@ E_reg : process (clk_out1, FlushE) is begin
 	if rising_edge(clk_out1) then
 		if FlushE = '1' then
 			RegWriteE   <= '0';
-			RegWriteM   <= '0';
 			MemWriteE   <= '0';
 			MemtoRegE   <= '0';
 			ALUSrcE     <= '0';
@@ -321,7 +318,6 @@ E_reg : process (clk_out1, FlushE) is begin
 			ALUControlE <= (others => '0');
 		else
 			RegWriteE   <= RegWriteD;
-			RegWriteM   <= RegWriteOutE;
 			MemWriteE   <= MemWriteD;
 			MemtoRegE   <= MemtoRegD;
 			RdE         <= RdD;
