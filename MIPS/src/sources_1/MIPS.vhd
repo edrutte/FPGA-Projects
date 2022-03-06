@@ -234,6 +234,7 @@ end process;
 
 Execute : entity work.Execute
 	Port map(
+		clk         => clk_out1,
 		ALUControl  => ALUControlE,
 		ALUSrc      => ALUSrcE,
 		RegDst      => RegDstE,

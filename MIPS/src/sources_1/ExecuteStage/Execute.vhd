@@ -5,6 +5,7 @@ use ieee.std_logic_1164.all;
 
 entity Execute is
 	Port (
+		clk         : in  std_logic;
 		ALUSrc      : in  std_logic;
 		RegDst      : in  std_logic;
 		RegSrcA     : in  std_logic_vector (31 downto 0);
@@ -27,10 +28,11 @@ begin
 
 ALU : entity work.alu4
 	Port map(
-		A  => RegSrcA,
-		B  => ALUop2,
-		OP => ALUControl,
-		Y  => ALUResult
+		clk => clk,
+		A   => RegSrcA,
+		B   => ALUop2,
+		OP  => ALUControl,
+		Y   => ALUResult
 	);
 
 with ALUSrc select ALUop2 <=
