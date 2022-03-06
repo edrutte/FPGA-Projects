@@ -56,7 +56,7 @@ ALUControl_proc : process (Opcode, Funct) is begin
 				when "011001" => ALUControl <= "0110";
 				when "100101" => ALUControl <= "1000";
 				when "000000" | "000100" => ALUControl <= "1100";
-				when "000011" => ALUControl <= "1110";
+				when "000011" | "000111" => ALUControl <= "1110";
 				when "000010" | "000110" => ALUControl <= "1101";
 				when "100010" => ALUControl <= "0101";
 				when "100110" => ALUControl <= "1011";

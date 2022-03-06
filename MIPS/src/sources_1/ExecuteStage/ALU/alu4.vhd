@@ -85,7 +85,7 @@ begin
 
 	with OP select Y <= 
 		 not_result when "0000",
-		 or_result when "1000",
+		 or_result  when "1000",
 		 add_result when "0100" | "0101",
 		 and_result when "1010",
 		 mul_result when "0110",

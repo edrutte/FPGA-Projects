@@ -99,7 +99,7 @@ with RtDestTemp select
 
 with std_logic_vector'(Instruction(31 downto 26) & Instruction(5 downto 0)) select 
 	OpA <=
-		std_logic_vector(to_signed(to_integer(signed(Instruction (10 downto 6))), BIT_DEPTH)) when "000000000000" | "000000000010" | "000000000011",
+		std_logic_vector(to_unsigned(to_integer(unsigned(Instruction(10 downto 6))), BIT_DEPTH)) when "000000000000" | "000000000010" | "000000000011" | "000000000111",
 		RD1 when others;
 
 CmpIn1 <= CmpData when ForwardAD = '1' else RD1;
