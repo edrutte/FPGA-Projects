@@ -27,6 +27,9 @@ signal ALUop2 : std_logic_vector (31 downto 0);
 begin
 
 ALU : entity work.alu4
+	generic map(
+		COMBINE_MULADD => true
+	)
 	Port map(
 		clk => clk,
 		A   => RegSrcA,
