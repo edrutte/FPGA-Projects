@@ -8,7 +8,6 @@ use ieee.numeric_std.all;
 
 entity Comparator is
     Port (
-    	clk_n : in  std_logic; 
     	a     : in  std_logic_vector (BIT_DEPTH - 1 downto 0);
 		b     : in  std_logic_vector (BIT_DEPTH - 1 downto 0);
 		aeqb  : out std_logic;
@@ -20,33 +19,27 @@ end Comparator;
 architecture SomeRandomName of Comparator is
 
 begin
-aeqb_proc : process(clk_n) is begin
-	if falling_edge(clk_n) then
-		if a = b then
-			aeqb <= '1';
-		else
-			aeqb <= '0';
-		end if;
+aeqb_proc : process(a, b) is begin
+	if a = b then
+		aeqb <= '1';
+	else
+		aeqb <= '0';
 	end if;
 end process;
 
-agtz_proc : process(clk_n) is begin
-	if falling_edge(clk_n) then
-		if signed(a) > 0 then
-			agtz <= '1';
-		else
-			agtz <= '0';
-		end if;
+agtz_proc : process(a) is begin
+	if signed(a) > 0 then
+		agtz <= '1';
+	else
+		agtz <= '0';
 	end if;
 end process;
 
-aeqz_proc : process(clk_n) is begin
-	if falling_edge(clk_n) then
-		if signed(a) = 0 then
-			aeqz <= '1';
-		else
-			aeqz <= '0';
-		end if;
+aeqz_proc : process(a) is begin
+	if signed(a) = 0 then
+		aeqz <= '1';
+	else
+		aeqz <= '0';
 	end if;
 end process;
 end SomeRandomName;

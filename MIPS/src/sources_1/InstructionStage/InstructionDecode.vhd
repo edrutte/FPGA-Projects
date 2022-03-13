@@ -19,6 +19,7 @@ entity InstructionDecode is
 		MemtoReg     : out std_logic;
 		MemWrite     : out std_logic;
 		Branch       : out std_logic;
+		PCSrc        : out std_logic;
 		ALUControl   : out std_logic_vector (3 downto 0);
 		ALUSrc       : out std_logic;
 		RegDst       : out std_logic;
@@ -26,7 +27,7 @@ entity InstructionDecode is
 		RD2          : out std_logic_vector (BIT_DEPTH - 1 downto 0);
 		RtDest       : out std_logic_vector (LOG_PORT_DEPTH - 1 downto 0);
 		RdDest       : out std_logic_vector (LOG_PORT_DEPTH - 1 downto 0);
-		Rs           : out std_logic_vector (LOG_PORT_DEPTH - 1 downto 0);
+		RsDest       : out std_logic_vector (LOG_PORT_DEPTH - 1 downto 0);
 		ImmOut       : out std_logic_vector (BIT_DEPTH - 1 downto 0);
 		PCBranch     : out std_logic_vector (27 downto 0)
 	);
@@ -36,6 +37,7 @@ architecture SomeRandomName of InstructionDecode is
 
 signal RtDestTemp  : std_logic_vector (LOG_PORT_DEPTH - 1 downto 0);
 signal RegImmBr    : std_logic;
+signal Opcode      : std_logic_vector (5 downto 0);
 signal CmpIn1      : std_logic_vector (BIT_DEPTH - 1 downto 0);
 signal CmpIn2      : std_logic_vector (BIT_DEPTH - 1 downto 0);
 signal RD1         : std_logic_vector (BIT_DEPTH - 1 downto 0);
@@ -45,12 +47,12 @@ signal z           : std_logic;
 
 begin
 
-RtDestTemp <= Instruction (20 downto 16);
-
 CU : entity work.ControlUnit
 	port map (
-		Opcode     => Instruction (31 downto 26),
+		Opcode     => Opcode,
+		RegImmInst => RtDestTemp,
 		Funct      => Instruction (5 downto 0),
+		Branch     => Branch,
 		RegWrite   => RegWrite,
 		MemtoReg   => MemtoReg,
 		MemWrite   => MemWrite,
@@ -73,7 +75,6 @@ RegFile : entity work.RegisterFile
 
 compare : entity work.Comparator
 	port map (
-		clk_n => clk_n,
 		a     => CmpIn1,
 		b     => CmpIn2,
 		aeqb  => eq,
@@ -81,18 +82,19 @@ compare : entity work.Comparator
 		aeqz  => z
 	);
 
-with Instruction(31 downto 26) select
-	Branch <=
+with Opcode select
+	PCSrc <=
 		eq when "000100",
 		not eq when "000101",
 		gt when "000111",
 		not gt when "000110",
 		RegImmBr when "000001",
+		'1' when "000010",
 		'0' when others;
 
 with RtDestTemp select
 	RegImmBr <=
-		gt nand z when "00000",
+		gt nor z when "00000",
 		gt or z when "00001",
 		'0' when others;
 
@@ -102,13 +104,19 @@ with std_logic_vector'(Instruction(31 downto 26) & Instruction(5 downto 0)) sele
 		std_logic_vector(to_unsigned(to_integer(unsigned(Instruction(10 downto 6))), BIT_DEPTH)) when "000000000000" | "000000000010" | "000000000011" | "000000000111",
 		RD1 when others;
 
+
+Opcode <= Instruction (31 downto 26);
+
+PCBranch <= Instruction (25 downto 0) & "00" when opcode = "000010" else std_logic_vector(signed(PCPlus4) + signed(ImmOut(15 downto 0) & "00"));
+
 CmpIn1 <= CmpData when ForwardAD = '1' else RD1;
 CmpIn2 <= CmpData when ForwardBD = '1' else RD2;
 
-PCBranch <= std_logic_vector(signed(PCPlus4) + signed(ImmOut(15 downto 0) & "00"));
-Rs       <= Instruction (25 downto 21);
-RtDest   <= RtDestTemp;
-RdDest   <= Instruction (15 downto 11);
+RsDest     <= Instruction (25 downto 21);
+RtDestTemp <= Instruction (20 downto 16);
+RtDest     <= RtDestTemp;
+RdDest     <= Instruction (15 downto 11);
+
 ImmOut   <= std_logic_vector(to_signed(to_integer(signed(Instruction (15 downto 0))), BIT_DEPTH));
 
 end SomeRandomName;

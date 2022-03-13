@@ -6,7 +6,9 @@ use ieee.numeric_std.all;
 entity ControlUnit is
 	Port ( 
 		Opcode     : in  std_logic_vector (5 downto 0);
+		RegImmInst : in  std_logic_vector (4 downto 0);
 		Funct      : in  std_logic_vector (5 downto 0);
+		Branch     : out std_logic;
 		RegWrite   : out std_logic;
 		MemtoReg   : out std_logic;
 		MemWrite   : out std_logic;
@@ -19,6 +21,18 @@ end ControlUnit;
 architecture SomeRandomName of ControlUnit is
 
 begin
+
+Branch_proc : process(Opcode, RegImmInst) is begin
+	case Opcode is
+		when "000100" | "000101" | "000111" | "000110" | "000010" => Branch <= '1';
+		when "000001" =>
+			case RegImmInst is
+				when "00000" | "00001" => Branch <= '1';
+				when others => Branch <= '0';
+			end case;
+		when others => Branch <= '0';
+	end case;
+end process;
 
 RegWrite_proc : process (Opcode) is begin
 	case Opcode is
