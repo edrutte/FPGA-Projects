@@ -18,28 +18,16 @@ end Comparator;
 
 architecture SomeRandomName of Comparator is
 
+signal aneg : std_logic;
+
 begin
-aeqb_proc : process(a, b) is begin
-	if a = b then
-		aeqb <= '1';
-	else
-		aeqb <= '0';
-	end if;
-end process;
 
-agtz_proc : process(a) is begin
-	if signed(a) > 0 then
-		agtz <= '1';
-	else
-		agtz <= '0';
-	end if;
-end process;
+aeqb <= '1' when a = b else '0';
 
-aeqz_proc : process(a) is begin
-	if signed(a) = 0 then
-		aeqz <= '1';
-	else
-		aeqz <= '0';
-	end if;
-end process;
+aeqz <= '1' when signed(a) = 0 else '0';
+
+aneg <= a(BIT_DEPTH - 1);
+
+agtz <= aneg nor aeqz;
+
 end SomeRandomName;

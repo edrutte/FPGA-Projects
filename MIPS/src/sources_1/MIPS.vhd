@@ -61,11 +61,13 @@ signal MemWriteM : std_logic;
 
 signal BranchD : std_logic;
 
+signal PCSrcF : std_logic;
 signal PCSrcD : std_logic;
 
 signal PCPlus4F : std_logic_vector(27 downto 0);
 signal PCPlus4D : std_logic_vector(27 downto 0);
 
+signal PCBranchF : std_logic_vector(27 downto 0);
 signal PCBranchD : std_logic_vector(27 downto 0);
 
 signal ALUControlD : std_logic_vector ( 3 downto 0 );
@@ -151,8 +153,8 @@ Fetch : entity work.InstructionFetch
 		clk         => clk_out1,
 		rst         => rst_debounce,
 		StallF      => StallF,
-		PCSrc       => PCSrcD,
-		PCBranch    => PCBranchD,
+		PCSrc       => PCSrcF,
+		PCBranch    => PCBranchF,
 		Instruction => fetchOut,
 		PCPlus4     => PCPlus4F
 	);
@@ -293,15 +295,15 @@ end process;
 
 D_reg : process (clk_out1) is begin
 	if rising_edge(clk_out1) then
-		if StallD = '0' then
-			if PCSrcD = '1' then
-				decodeIn <= (others => '0');
-				PCPlus4D <= (others => '0');
-			else
-				decodeIn <= fetchOut;
-				PCPlus4D <= PCPlus4F;
-			end if;
+		if PCSrcF = '1' then
+			decodeIn <= (others => '0');
+			PCPlus4D <= (others => '0');
+		elsif StallD = '0' or PCSrcD = '1' then
+			decodeIn <= fetchOut;
+			PCPlus4D <= PCPlus4F;
 		end if;
+		PCSrcF    <= PCSrcD;
+		PCBranchF <= PCBranchD;
 	end if;
 end process;
 

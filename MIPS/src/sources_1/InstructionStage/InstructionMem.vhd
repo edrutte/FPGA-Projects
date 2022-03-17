@@ -85,45 +85,32 @@ signal mem_data : mem_data_type :=
 		--x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1 ;store pointer++
 		--x"ae", x"29", x"00", x"00", --sw $t1 0x0($s1) ;store to 7seg
 ----------------------------------------------------------------------
-----------------------first 10 fib nums using branch------------------
-		--x"20", x"10", x"00", x"00", --addi $s0, $zero, 0x0 ;save pointer
-		--x"20", x"11", x"10", x"23", --addi $s1, $zero, 0x1023 ;7seg pointer
-		--x"20", x"12", x"00", x"0b", --addi $s2, $zero, 0xb ;Num fibs to calculate
-		--x"20", x"08", x"00", x"00", --addi $t0, $zero, 0x0 ;fib(0) = 0
-		--x"20", x"09", x"00", x"01", --addi $t1, $zero, 0x1 ;fib(1) = 1
-		--x"01", x"28", x"40", x"20", --add $t0, $t1, $t0 ;next fib
-		--x"ae", x"08", x"00", x"00", --sw $t0, 0x0($s0) ;store
-		--x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1 ;store pointer++
-		--x"12", x"50", x"00", x"05", --beq $s2, $s0, 0x5 ; check if done
-		--x"01", x"28", x"48", x"20", --add $t1, $t1, $t0 ;next fib
-		--x"ae", x"09", x"00", x"00", --sw $t1, 0x0($s0) ;store
-		--x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1 ;store pointer++
-		--x"16", x"50", x"ff", x"f8", --bne $s2, $s0, -0x8 ; loop if not done
-----------------------------------------------------------------------
 ------------------------------branch/jump test------------------------
-		x"20", x"10", x"00", x"00", --addi $s0, $zero, 0x0
+		x"20", x"10", x"ff", x"ff", --addi $s0, $zero, -0x1
 		x"20", x"08", x"00", x"01", --addi $t0, $zero, 0x1
-		x"ae", x"08", x"00", x"00", --sw $t0, 0x0($s0)
 		x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1
-		x"1d", x"00", x"00", x"0a", --bgtz $t0, 0xa
 		x"ae", x"08", x"00", x"00", --sw $t0, 0x0($s0)
+		x"1d", x"00", x"00", x"0c", --bgtz $t0, 0xc
 		x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1
-		x"05", x"01", x"00", x"09", --bgez $t0 0x9
 		x"ae", x"08", x"00", x"00", --sw $t0, 0x0($s0)
+		x"05", x"01", x"00", x"0b", --bgez $t0 0xb
 		x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1
-		x"05", x"00", x"00", x"08", --bltz $t0 0x8
 		x"ae", x"08", x"00", x"00", --sw $t0, 0x0($s0)
+		x"05", x"00", x"00", x"0a", --bltz $t0 0xa
 		x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1
-		x"19", x"00", x"00", x"07", --blez $t0 0x7
-		x"08", x"00", x"00", x"02", --j 0x2
+		x"ae", x"08", x"00", x"00", --sw $t0, 0x0($s0)
+		x"19", x"00", x"00", x"09", --blez $t0 0x9
+		x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1
+		x"08", x"00", x"00", x"03", --j 0x3
+		x"00", x"00", x"00", x"00",
+		x"08", x"00", x"00", x"06", --j 0x6
 		x"21", x"08", x"ff", x"fd", --addi $t0, $t0, -0x3
-		x"08", x"00", x"00", x"05", --j 0x5
+		x"08", x"00", x"00", x"09", --j 0x9
 		x"21", x"08", x"ff", x"fe", --addi $t0, $t0, -0x2
-		x"08", x"00", x"00", x"08", --j 0x8
+		x"08", x"00", x"00", x"0c", --j 0xc
 		x"21", x"08", x"00", x"07", --addi $t0, $t0, 0x7
-		x"08", x"00", x"00", x"0b", --j 0xb
+		x"08", x"00", x"00", x"03", --j 0x3
 		x"21", x"08", x"ff", x"fd", --addi $t0, $t0, -0x3
-		x"08", x"00", x"00", x"02", --j 0x2
 
 		others => (others => '0')
 	);
