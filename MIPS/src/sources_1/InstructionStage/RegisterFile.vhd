@@ -18,7 +18,7 @@ end RegisterFile;
 
 architecture FileRegister of RegisterFile is
 
-type mem_data_type is array (2**LOG_PORT_DEPTH downto 0) of std_logic_vector (BIT_DEPTH - 1 downto 0);
+type mem_data_type is array (2**LOG_PORT_DEPTH - 1 downto 0) of std_logic_vector (BIT_DEPTH - 1 downto 0);
 signal mem_data : mem_data_type := (others => (others => '0'));
 
 begin
