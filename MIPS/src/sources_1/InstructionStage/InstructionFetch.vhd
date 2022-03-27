@@ -34,11 +34,11 @@ mem : InstructionMem
 		d_out => Instruction
 	);
 				 
-fetch_proc : process (rst, StallF, clk) is begin
+fetch_proc : process (rst, clk) is begin
 	if rst = '1' then
 		PC <= (others => '0');
-	elsif StallF = '0' then
-		if rising_edge(clk) then
+	elsif rising_edge(clk) then
+		if StallF = '0' then
 			if PCSrc = '1' then
 				PC <= PCBranch;
 			else

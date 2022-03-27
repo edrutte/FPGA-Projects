@@ -8,7 +8,7 @@ entity ControlUnit is
 		Opcode     : in  std_logic_vector (5 downto 0);
 		RegImmInst : in  std_logic_vector (4 downto 0);
 		Funct      : in  std_logic_vector (5 downto 0);
-		Branch     : out std_logic;
+		Link       : out std_logic;
 		RegWrite   : out std_logic;
 		MemtoReg   : out std_logic;
 		MemWrite   : out std_logic;
@@ -17,26 +17,20 @@ entity ControlUnit is
 		RegDst     : out std_logic
 	);
 end ControlUnit;
-
 architecture SomeRandomName of ControlUnit is
 
 begin
 
-Branch_proc : process(Opcode, RegImmInst) is begin
+Link_proc : process(Opcode) is begin
 	case Opcode is
-		when "000100" | "000101" | "000111" | "000110" | "000010" => Branch <= '1';
-		when "000001" =>
-			case RegImmInst is
-				when "00000" | "00001" => Branch <= '1';
-				when others => Branch <= '0';
-			end case;
-		when others => Branch <= '0';
+		when "000011" => Link <= '1';
+		when others => Link <= '0';
 	end case;
 end process;
 
 RegWrite_proc : process (Opcode) is begin
 	case Opcode is
-		when "101011" | "000001" | "000101" | "000111" | "000110" | "000100" => RegWrite <= '0';
+		when "101011" | "000001" | "000101" | "000111" | "000110" | "000100" | "000010" | "000011" => RegWrite <= '0';
 		when others => RegWrite <= '1';
 	end case;
 end process;
@@ -59,7 +53,7 @@ end process;
 	
 ALUControl_proc : process (Opcode, Funct) is begin
 	case Opcode is
-		when "001000" | "101011" | "100011" => ALUControl <= "0100";
+		when "001000" | "101011" | "100011" | "000011" => ALUControl <= "0100";
 		when "001100" => ALUControl <= "1010";
 		when "001101" => ALUControl <= "1000";
 		when "001110" => ALUControl <= "1011";
@@ -81,11 +75,10 @@ ALUControl_proc : process (Opcode, Funct) is begin
 end process;
 	
 ALUSrc_proc : process (Opcode) is begin
-	if Opcode = "000000" then
-		ALUSrc <= '0';
-	else
-		ALUSrc <= '1';
-	end if;
+	case Opcode is
+		when "000000" | "000011" => ALUSrc <= '0';
+		when others => ALUSrc <= '1';
+	end case;
 end process;
 	
 RegDst_proc : process (Opcode) is begin

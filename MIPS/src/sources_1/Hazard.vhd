@@ -11,6 +11,8 @@ entity Hazard is
 		MemtoRegE : in  std_logic;
 		MemtoRegM : in  std_logic;
 		BranchD   : in  std_logic;
+		LinkM     : in  std_logic;
+		LinkW     : in  std_logic;
 		RsD       : in  std_logic_vector ( 4 downto 0 );
 		RtD       : in  std_logic_vector ( 4 downto 0 );
 		RsE       : in  std_logic_vector ( 4 downto 0 );
@@ -38,7 +40,7 @@ signal branchStall     : std_logic;
 begin
 
 ForwardAD_proc : process (RsD, WriteRegM, RegWriteM) is begin
-	if RsD /= "00000" and RsD = WriteRegM and RegWriteM = '1' then
+	if RsD /= "00000" and (((RsD = WriteRegM) and (RegWriteM = '1')) or ((RsD = "11111") and (LinkM = '1'))) then
 		ForwardAD <= '1';
 	else
 		ForwardAD <= '0';
@@ -46,9 +48,9 @@ ForwardAD_proc : process (RsD, WriteRegM, RegWriteM) is begin
 end process;
 
 ForwardAE_proc : process (RsE, RegWriteM, RegWriteW, WriteRegM, WriteRegW) is begin
-	if RsE /= "00000" and RsE = WriteRegM and RegWriteM = '1' then
+	if RsE /= "00000" and (((RsE = WriteRegM) and (RegWriteM = '1')) or ((RsE = "11111") and (LinkM = '1'))) then
 		ForwardAE <= "10";
-	elsif (RsE /= "00000") and (RsE = WriteRegW) and (RegWriteW = '1') then
+	elsif (RsE /= "00000") and (((RsE = WriteRegW) and (RegWriteW = '1')) or ((RsE = "11111") and (LinkW = '1'))) then
 		ForwardAE <= "01";
 	else
 		ForwardAE <= "00";
@@ -56,7 +58,7 @@ ForwardAE_proc : process (RsE, RegWriteM, RegWriteW, WriteRegM, WriteRegW) is be
 end process;
 
 ForwardBD_proc : process (RtD, WriteRegM, RegWriteM) is begin
-	if RtD /= "00000" and RtD = WriteRegM and RegWriteM = '1' then
+	if RtD /= "00000" and (((RtD = WriteRegM) and (RegWriteM = '1')) or ((RtD = "11111") and (LinkM = '1'))) then
 		ForwardBD <= '1';
 	else
 		ForwardBD <= '0';
@@ -64,9 +66,9 @@ ForwardBD_proc : process (RtD, WriteRegM, RegWriteM) is begin
 end process;
 
 ForwardBE_proc : process (RtE, RegWriteM, RegWriteW, WriteRegM, WriteRegW) is begin
-	if RtE /= "00000" and RtE = WriteRegM and RegWriteM = '1' then
+	if RtE /= "00000" and (((RtE = WriteRegM) and (RegWriteM = '1')) or ((RtE = "11111") and (LinkM = '1'))) then
 		ForwardBE <= "10";
-	elsif RtE /= "00000" and RtE = WriteRegW and RegWriteW = '1' then
+	elsif RtE /= "00000" and(((RtE = WriteRegW) and (RegWriteW = '1')) or ((RtE = "11111") and (LinkW = '1'))) then
 		ForwardBE <= "01";
 	else
 		ForwardBE <= "00";

@@ -5,12 +5,13 @@ use work.globals.all;
 
 entity RegisterFile is
 	Port (
+		clk_n : in  std_logic;
 		Addr1 : in  std_logic_vector (LOG_PORT_DEPTH - 1 downto 0);
 		Addr2 : in  std_logic_vector (LOG_PORT_DEPTH - 1 downto 0);
 		Addr3 : in  std_logic_vector (LOG_PORT_DEPTH - 1 downto 0);
-		clk_n : in  std_logic;
 		wd    : in  std_logic_vector (BIT_DEPTH - 1 downto 0);
 		we    : in  std_logic;
+		Link  : in  std_logic;
 		RD1   : out std_logic_vector (BIT_DEPTH - 1 downto 0);
 		RD2   : out std_logic_vector (BIT_DEPTH - 1 downto 0)
 	);
@@ -29,10 +30,11 @@ mem_proc : process (clk_n) is begin
 			if to_integer(unsigned(Addr3)) /= 0 then
 				mem_data(to_integer(unsigned(Addr3))) <= wd;
 			end if;
+		elsif Link = '1' then
+			mem_data(31) <= wd;
 		end if;
 	end if;
 end process;
-
 
 RD1 <= mem_data(to_integer(unsigned(Addr1)));
 
