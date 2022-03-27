@@ -25,7 +25,7 @@ entity InstructionDecode is
 		ALUSrc       : out std_logic;
 		RegDst       : out std_logic;
 		OpA          : out std_logic_vector (BIT_DEPTH - 1 downto 0);
-		OpB          : out std_logic_vector (BIT_DEPTH - 1 downto 0);
+		RD2          : out std_logic_vector (BIT_DEPTH - 1 downto 0);
 		RtDest       : out std_logic_vector (LOG_PORT_DEPTH - 1 downto 0);
 		RdDest       : out std_logic_vector (LOG_PORT_DEPTH - 1 downto 0);
 		RsDest       : out std_logic_vector (LOG_PORT_DEPTH - 1 downto 0);
@@ -42,7 +42,6 @@ signal CmpIn1      : std_logic_vector (BIT_DEPTH - 1 downto 0);
 signal CmpIn2      : std_logic_vector (BIT_DEPTH - 1 downto 0);
 signal Funct       : std_logic_vector (5 downto 0);
 signal RD1         : std_logic_vector (BIT_DEPTH - 1 downto 0);
-signal RD2         : std_logic_vector (BIT_DEPTH - 1 downto 0);
 signal eq          : std_logic;
 signal gt          : std_logic;
 signal sa          : std_logic_vector (4 downto 0);
@@ -67,7 +66,7 @@ CU : entity work.ControlUnit
 RegFile : entity work.RegisterFile
 	Port map (
 		clk_n => clk,
-		Addr1 => Instruction (25 downto 21),
+		Addr1 => RsDest,
 		Addr2 => Instruction (20 downto 16),
 		Addr3 => RegWriteAddr,
 		wd    => RegWriteData,
@@ -93,15 +92,8 @@ OpA_proc : process(Opcode, Funct, RD1, sa) is begin
 				when "000000" | "000010" | "000011" => OpA <= std_logic_vector(to_unsigned(to_integer(unsigned(sa)), BIT_DEPTH));
 				when others => OpA <= RD1;
 			end case;
-		when "000011" => OpA <= std_logic_vector(to_unsigned(to_integer(unsigned(PCPlus4)), BIT_DEPTH));
+		when "000011" => OpA <= std_logic_vector(to_unsigned(to_integer(unsigned(PCPlus4) + 4), BIT_DEPTH));
 		when others => OpA <= RD1;
-	end case;
-end process;
-
-OpB_proc : process(Opcode) is begin
-	case Opcode is
-		when "000011" => OpB <= std_logic_vector(to_unsigned(4, BIT_DEPTH));
-		when others => OpB <= RD2;
 	end case;
 end process;
 

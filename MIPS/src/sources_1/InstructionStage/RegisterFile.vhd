@@ -26,12 +26,10 @@ begin
 
 mem_proc : process (clk_n) is begin
 	if falling_edge(clk_n) then
-		if we = '1' then
+		if we = '1' or Link = '1' then
 			if to_integer(unsigned(Addr3)) /= 0 then
 				mem_data(to_integer(unsigned(Addr3))) <= wd;
 			end if;
-		elsif Link = '1' then
-			mem_data(31) <= wd;
 		end if;
 	end if;
 end process;

@@ -191,7 +191,7 @@ Decode : entity work.InstructionDecode
 		ALUSrc       => ALUSrcD,
 		RegDst       => RegDstD,
 		OpA          => RD1D,
-		OpB          => RD2D,
+		RD2          => RD2D,
 		RtDest       => RtD,
 		RdDest       => RdD,
 		RsDest       => RsD,
@@ -282,7 +282,8 @@ Wb : entity work.Writeback
 stageDiv : process (clk_out1) is begin
 	if rising_edge(clk_out1) then
 		RD1E        <= RD1D;
-		RD2E        <= RD2D;
+		RtE         <= RtD;
+		RdE         <= RdD;
 		LinkE       <= LinkD;
 		LinkM       <= LinkE;
 		LinkW       <= LinkM;
@@ -328,9 +329,8 @@ E_reg : process (clk_out1, FlushE) is begin
 			ALUSrcE     <= '0';
 			RegDstE     <= '0';
 			ImmE        <= (others => '0');
-			RtE         <= (others => '0');
+			RD2E        <= (others => '0');
 			RsE         <= (others => '0');
-			RdE         <= (others => '0');	 
 		else
 			RegWriteE   <= RegWriteD;
 			MemWriteE   <= MemWriteD;
@@ -338,9 +338,8 @@ E_reg : process (clk_out1, FlushE) is begin
 			ALUSrcE     <= ALUSrcD;
 			RegDstE     <= RegDstD;
 			ImmE        <= ImmD;
-			RtE         <= RtD;
+			RD2E        <= RD2D;
 			RsE         <= RsD;
-			RdE         <= RdD;
 		end if;
 	end if;
 end process;
