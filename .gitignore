@@ -7,12 +7,14 @@
 /**/*.funcunit
 /SHA256/Vitis/*/*_data.json
 /SHA256/Vitis/Debug/
+/**/*.ip_user_files/
 /**/.autopilot/
 /**/.settings/
 /**/*.cache/
 /**/.debug/
 /**/*.runs/
 /**/*.sim/
+/**/*.gen/
 /**/*.hw/
 /**/.Xil/
 /**/.apc/
