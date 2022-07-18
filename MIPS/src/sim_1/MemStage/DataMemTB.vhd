@@ -1,5 +1,5 @@
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
+library ieee;
+use ieee.std_logic_1164.all;
 use work.globals.all;
 
 --use IEEE.NUMERIC_STD.ALL;
@@ -11,9 +11,9 @@ end DataMemTB;
 architecture Behavioral of DataMemTB is
 
 signal clk, w_en : std_logic := '0';
-signal addr : std_logic_vector (DATA_ADDR_BITS - 1 downto 0);
-signal d_in : std_logic_vector (BIT_DEPTH - 1 downto 0);
-signal d_out : std_logic_vector (BIT_DEPTH - 1 downto 0);
+signal addr      : std_logic_vector (DATA_ADDR_BITS - 1 downto 0);
+signal d_in      : std_logic_vector (BIT_DEPTH - 1 downto 0);
+signal d_out     : std_logic_vector (BIT_DEPTH - 1 downto 0);
 
 function to_string ( a: std_logic_vector) return string is
 variable b : string (1 to a'length) := (others => NUL);

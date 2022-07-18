@@ -5,18 +5,17 @@
 --  Architecture:  Testbench
 --  Author:        Jason Blocklove
 --  Created:       07/29/19
---  Modified:	   3/24/2021 By Evan Ruttenberg
+--  Modified:	   7/18/2022 By Evan Ruttenberg
 --  VHDL'93
 --  Description:   The following is the entity and
 --                 architectural description of a
 --                aluTB
 -------------------------------------------------
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.NUMERIC_STD.ALL;
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
 entity aluTB is
-    Generic ( N : integer := 32 );
 end aluTB;
 
 architecture tb of aluTB is
@@ -30,26 +29,27 @@ begin
     end loop;
 return b;
 end function;
+
 component alu4 IS
-    Port ( A : in  std_logic_vector(31 downto 0);
-           B : in  std_logic_vector(31 downto 0);
+    Port ( A  : in  std_logic_vector(31 downto 0);
+           B  : in  std_logic_vector(31 downto 0);
            OP : in  std_logic_vector(3 downto 0);
-           Y    : out std_logic_vector(31 downto 0)
+           Y  : out std_logic_vector(31 downto 0)
           );
 end component;
 
-signal A : std_logic_vector(31 downto 0);
-signal B : std_logic_vector(31 downto 0);
+signal A  : std_logic_vector(31 downto 0);
+signal B  : std_logic_vector(31 downto 0);
 signal OP : std_logic_vector(3 downto 0);
-signal Y : std_logic_vector(31 downto 0);
+signal Y  : std_logic_vector(31 downto 0);
 
 type alu_tests is record
 	-- Test Inputs
-	A : std_logic_vector(31 downto 0);
-	B : std_logic_vector(31 downto 0);
+	A  : std_logic_vector(31 downto 0);
+	B  : std_logic_vector(31 downto 0);
 	OP : std_logic_vector(3 downto 0);
 	-- Test Outputs
-	Y : std_logic_vector(31 downto 0);
+	Y  : std_logic_vector(31 downto 0);
 end record;
 
 type test_array is array (natural range <>) of alu_tests;
@@ -81,33 +81,26 @@ constant tests : test_array :=(
 
 begin
 
-
 aluN_0 : alu4
     port map (
 			A  => A,
 			B  => B,
-            OP  => OP,
-            Y     => Y
+            OP => OP,
+            Y  => Y
 		);
 
-	stim_proc:process
-	begin
-
-		for i in tests'range loop
-		--TODO:	signal assignments and assert statements
+stim_proc : process is begin
+	for i in tests'range loop
 		A <= tests(i).A;
 		B <= tests(i).B;
 		OP <= tests(i).OP;
-			wait for 100 ns;
-			assert Y = tests(i).Y 
-				report "Expected: " & to_string(tests(i).Y) & " Got: " & to_string(Y) & " OP: " & to_string(tests(i).OP)
-				severity error;
-		end loop;
-
-
-		assert false
-		  report "Testbench Concluded."
-		  severity failure;
-
-	end process;
+		wait for 100 ns;
+		assert Y = tests(i).Y 
+			report "Expected: " & to_string(tests(i).Y) & " Got: " & to_string(Y) & " OP: " & to_string(tests(i).OP)
+			severity error;
+	end loop;
+	assert false
+		report "Testbench Concluded."
+		severity failure;
+end process;
 end tb;

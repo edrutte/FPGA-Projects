@@ -5,16 +5,16 @@
 --  Architecture:  testbench
 --  Author:        Jason Blocklove
 --  Created:       09/04/19
---  Modified:	   3/8/2021 By Evan Ruttenberg
+--  Modified:	   7/18/2022 By Evan Ruttenberg
 --  VHDL'93
 --  Description:   The following is the entity and
 --                 architectural description of a
 --                 testbench for InstructionDecode
 --                 stage
 -------------------------------------------------
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.NUMERIC_STD.ALL;
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
 entity InstructionDecodeTB is
 end InstructionDecodeTB;
@@ -170,16 +170,14 @@ UUT : InstructionDecode
 		ImmOut		 => ImmOut
 	);
 
-clk_proc:process
-begin
+clk_proc : process is begin
 	clk <= '0';
 	wait for 50 ns;
 	clk <= '1';
 	wait for 50 ns;
 end process;
 
-stim_proc:process
-begin
+stim_proc : process is begin
 	wait until clk='0';
 	for i in 0 to 2 loop
 		wait until clk='1';
