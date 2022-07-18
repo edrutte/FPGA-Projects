@@ -38,34 +38,34 @@ signal rst_debounce : std_logic;
 --signal rstMeta   : std_logic;
 --signal rstNoMeta : std_logic;
 
-signal fetchOut : std_logic_vector ( 31 downto 0 );
+signal fetchOut : std_logic_vector ( 31 downto 0 ) := ( others => '0' );
 signal decodeIn : std_logic_vector ( 31 downto 0 ) := ( others => '0' );
 
-signal RegWriteD : std_logic;
-signal RegWriteE : std_logic;
-signal RegWriteM : std_logic;
-signal RegWriteW : std_logic;
+signal RegWriteD : std_logic := '0';
+signal RegWriteE : std_logic := '0';
+signal RegWriteM : std_logic := '0';
+signal RegWriteW : std_logic := '0';
 
 signal WriteRegE : std_logic_vector ( LOG_PORT_DEPTH - 1 downto 0 );
 signal WriteRegM : std_logic_vector ( LOG_PORT_DEPTH - 1 downto 0 );
 signal WriteRegW : std_logic_vector ( LOG_PORT_DEPTH - 1 downto 0 );
 
-signal MemtoRegD : std_logic;
-signal MemtoRegE : std_logic;
-signal MemtoRegM : std_logic;
-signal MemtoRegW : std_logic;
+signal MemtoRegD : std_logic := '0';
+signal MemtoRegE : std_logic := '0';
+signal MemtoRegM : std_logic := '0';
+signal MemtoRegW : std_logic := '0';
 
-signal MemWriteD : std_logic;
-signal MemWriteE : std_logic;
-signal MemWriteM : std_logic;
+signal MemWriteD : std_logic := '0';
+signal MemWriteE : std_logic := '0';
+signal MemWriteM : std_logic := '0';
 
-signal LinkD : std_logic;
-signal LinkE : std_logic;
-signal LinkM : std_logic;
-signal LinkW : std_logic;
+signal LinkD : std_logic := '0';
+signal LinkE : std_logic := '0';
+signal LinkM : std_logic := '0';
+signal LinkW : std_logic := '0';
 
-signal PCSrcF : std_logic;
-signal PCSrcD : std_logic;
+signal PCSrcF : std_logic := '0';
+signal PCSrcD : std_logic := '0';
 
 signal PCPlus4F : std_logic_vector(27 downto 0);
 signal PCPlus4D : std_logic_vector(27 downto 0);
