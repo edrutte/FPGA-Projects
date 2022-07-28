@@ -27,7 +27,8 @@ proc genMMCM {} {
 	CONFIG.MMCM_CLKOUT0_DIVIDE_F {10.000}
 	CONFIG.CLKOUT1_JITTER {162.035}
 	CONFIG.CLKOUT1_PHASE_ERROR {164.985}
-    } [get_ips clk_wiz_0]
+	CONFIG.USE_SAFE_CLOCK_STARTUP {true}
+} [get_ips clk_wiz_0]
     set_property -dict {
 	GENERATE_SYNTH_CHECKPOINT {1}
     } $clk_wiz_0
