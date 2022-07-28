@@ -5,125 +5,50 @@ use work.globals.all;
 
 entity MIPS is
 	Port ( 
-		clk	     : in  std_logic;
-		rst	     : in  std_logic;
-		sw	     : in  std_logic_vector ( NUM_SWITCHES - 1 downto 0 );
-		--ALUResult    : out std_logic_vector ( 31 downto 0 );
-		an_7seg      : out std_logic_vector ( 3 downto 0 );
-		ag_seg       : out std_logic_vector ( 6 downto 0 ) := "0000000";
-		seg_dot      : out std_logic
+		clk	    : in  std_logic;
+		rst	    : in  std_logic;
+		sw	    : in  std_logic_vector ( NUM_SWITCHES - 1 downto 0 );
+		an_7seg : out std_logic_vector ( 3 downto 0 ) := "1111";
+		ag_seg  : out std_logic_vector ( 6 downto 0 ) := "1111111";
+		seg_dot : out std_logic := '1'
 	);
-
-	attribute dont_touch         : string;
-	attribute dont_touch of MIPS : entity is "true";
-
 end MIPS;
 
 architecture Behavioral of MIPS is
 
-attribute dont_touch of Behavioral : architecture is "true";
-attribute dont_touch of Fetch      : label is "true";
-attribute dont_touch of Decode     : label is "true";
-attribute dont_touch of Execute    : label is "true";
-attribute dont_touch of Mem        : label is "true";
-attribute dont_touch of Wb         : label is "true";
+signal PC          : std_logic_vector (27 downto 0) := (others => '0');
+signal Instruction : std_logic_vector (31 downto 0) := (others => '0');
+
+signal dataAddr    : std_logic_vector (DATA_ADDR_BITS - 1 downto 0);
+signal readData    : std_logic_vector (BIT_DEPTH - 1 downto 0);
+signal writeData   : std_logic_vector (BIT_DEPTH - 1 downto 0);
+signal we          : std_logic := '0';
+
+signal displayed_number : std_logic_vector(15 downto 0);
 
 signal clk_out1 : std_logic := '0';
 
-signal swMeta : std_logic_vector ( NUM_SWITCHES - 1 downto 0 );
-signal swNoMeta : std_logic_vector ( NUM_SWITCHES - 1 downto 0 );
+signal swMeta   : std_logic_vector ( NUM_SWITCHES - 1 downto 0 ) := (others => '0');
+signal swNoMeta : std_logic_vector ( NUM_SWITCHES - 1 downto 0 ) := (others => '0');
 
-signal rst_debounce : std_logic;
+signal rst_debounce : std_logic := '0';
 
---signal rstMeta   : std_logic;
---signal rstNoMeta : std_logic;
-
-signal fetchOut : std_logic_vector ( 31 downto 0 ) := ( others => '0' );
-signal decodeIn : std_logic_vector ( 31 downto 0 ) := ( others => '0' );
-
-signal RegWriteD : std_logic := '0';
-signal RegWriteE : std_logic := '0';
-signal RegWriteM : std_logic := '0';
-signal RegWriteW : std_logic := '0';
-
-signal WriteRegE : std_logic_vector ( LOG_PORT_DEPTH - 1 downto 0 );
-signal WriteRegM : std_logic_vector ( LOG_PORT_DEPTH - 1 downto 0 );
-signal WriteRegW : std_logic_vector ( LOG_PORT_DEPTH - 1 downto 0 );
-
-signal MemtoRegD : std_logic := '0';
-signal MemtoRegE : std_logic := '0';
-signal MemtoRegM : std_logic := '0';
-signal MemtoRegW : std_logic := '0';
-
-signal MemWriteD : std_logic := '0';
-signal MemWriteE : std_logic := '0';
-signal MemWriteM : std_logic := '0';
-
-signal LinkD : std_logic := '0';
-signal LinkE : std_logic := '0';
-signal LinkM : std_logic := '0';
-signal LinkW : std_logic := '0';
-
-signal PCSrcF : std_logic := '0';
-signal PCSrcD : std_logic := '0';
-
-signal PCPlus4F : std_logic_vector(27 downto 0);
-signal PCPlus4D : std_logic_vector(27 downto 0);
-
-signal PCBranchF : std_logic_vector(27 downto 0);
-signal PCBranchD : std_logic_vector(27 downto 0);
-
-signal ALUControlD : std_logic_vector ( 3 downto 0 );
-signal ALUControlE : std_logic_vector ( 3 downto 0 );
-
-signal ALUSrcD : std_logic;
-signal ALUSrcE : std_logic;
-
-signal RegDstD : std_logic;
-signal RegDstE : std_logic;
-
-signal RD1D : std_logic_vector ( BIT_DEPTH - 1 downto 0 );
-signal RD1E : std_logic_vector ( BIT_DEPTH - 1 downto 0 );
-
-signal RD2D : std_logic_vector ( BIT_DEPTH - 1 downto 0 );
-signal RD2E : std_logic_vector ( BIT_DEPTH - 1 downto 0 );
-
-signal RsD : std_logic_vector ( LOG_PORT_DEPTH - 1 downto 0 );
-signal RsE : std_logic_vector ( LOG_PORT_DEPTH - 1 downto 0 );
-
-signal RtD : std_logic_vector ( LOG_PORT_DEPTH - 1 downto 0 );
-signal RtE : std_logic_vector ( LOG_PORT_DEPTH - 1 downto 0 );
-
-signal RdD : std_logic_vector ( LOG_PORT_DEPTH - 1 downto 0 );
-signal RdE : std_logic_vector ( LOG_PORT_DEPTH - 1 downto 0 );
-
-signal ImmD : std_logic_vector ( BIT_DEPTH - 1 downto 0 );
-signal ImmE : std_logic_vector ( BIT_DEPTH - 1 downto 0 );
-
-signal ALUResultE : std_logic_vector ( BIT_DEPTH - 1 downto 0 );
-signal ALUResultM : std_logic_vector ( BIT_DEPTH - 1 downto 0 );
-signal ALUResultW : std_logic_vector ( BIT_DEPTH - 1 downto 0 );
-
-signal WriteDataE : std_logic_vector ( BIT_DEPTH - 1 downto 0 );
-signal WriteDataM : std_logic_vector ( BIT_DEPTH - 1 downto 0 );
-
-signal MemOutM : std_logic_vector ( BIT_DEPTH - 1 downto 0 );
-signal MemOutW : std_logic_vector ( BIT_DEPTH - 1 downto 0 );
-
-signal result : std_logic_vector ( BIT_DEPTH - 1 downto 0 );
-
-signal StallF, StallD, FlushE : std_logic;
-
-signal ForwardAD, ForwardBD : std_logic;
-
-signal ForwardAE, ForwardBE : std_logic_vector ( 1 downto 0 );
-
-signal RegSrcA, RegSrcB : std_logic_vector ( BIT_DEPTH - 1 downto 0 );
+signal rstMeta   : std_logic := '0';
+signal rstNoMeta : std_logic := '0';
 
 component clk_wiz_0
 	port(
 		clkIn    : in  std_logic;
 		clk_out1 : out std_logic
+	);
+end component;
+
+component seg7 is
+	Port(
+		Clock_50MHz      : in  std_logic;
+		displayed_number : in  std_logic_vector ( 15 downto 0 );
+		Anode_Activate   : out std_logic_vector ( 3 downto 0 );
+		LED_out          : out std_logic_vector ( 6 downto 0 )
 	);
 end component;
 
@@ -144,206 +69,63 @@ begin
 --end process;
 
 clk_div : clk_wiz_0
-   port map ( 
-  -- Clock out ports  
-   clk_out1 => clk_out1,
-   -- Clock in ports
-   clkIn => clk
- );
-
-Fetch : entity work.InstructionFetch
-	Port map(
-		clk         => clk_out1,
-		rst         => rst_debounce,
-		StallF      => StallF,
-		PCSrc       => PCSrcF,
-		PCBranch    => PCBranchF,
-		Instruction => fetchOut,
-		PCPlus4     => PCPlus4F
-	);
+   Port map(
+   		clk_out1 => clk_out1,
+   		clkIn    => clk
+ 	);
 
 Debouncer : entity work.debounce
 	Port map(
-		clk          => clk_out1,
+		clk          => clk,
 		rst          => '0',
-		button_in    => rst,
+		button_in    => rstNoMeta,
 		button_out_p => rst_debounce
 	);
 
-Decode : entity work.InstructionDecode
+memI : entity work.InstructionMem
 	Port map(
-		clk          => clk_out1,
-		Instruction  => decodeIn,
-		RegWriteAddr => WriteRegW,
-		RegWriteData => result,
-		CmpData      => ALUResultM,
-		PCPlus4      => PCPlus4D,
-		RegWriteEn   => RegWriteW,
-		LinkWriteEn  => LinkW,
-		ForwardAD    => ForwardAD,
-		ForwardBD    => ForwardBD,
-		RegWrite     => RegWriteD,
-		MemtoReg     => MemtoRegD,
-		MemWrite     => MemWriteD,
-		Link         => LinkD,
-		PCSrc        => PCSrcD,
-		ALUControl   => ALUControlD,
-		ALUSrc       => ALUSrcD,
-		RegDst       => RegDstD,
-		OpA          => RD1D,
-		RD2          => RD2D,
-		RtDest       => RtD,
-		RdDest       => RdD,
-		RsDest       => RsD,
-		ImmOut       => ImmD,
-		PCBranch     => PCBranchD
-	);
-	    
-Hazard : entity work.Hazard
-	Port map(
-		RsD       => RsD,
-		RtD       => RtD,
-		RsE       => RsE,
-		RtE       => RtE,
-		StallF    => StallF,
-		StallD    => StallD,
-		FlushE    => FlushE,
-		MemtoRegE => MemtoRegE,
-		MemtoRegM => MemToRegM,
-		BranchD   => PCSrcD,
-		LinkM     => LinkM,
-		LinkW     => LinkW,
-		WriteRegE => WriteRegE,
-		WriteRegM => WriteRegM,
-		WriteRegW => WriteRegW,
-		RegWriteE => RegWriteE,
-		RegWriteM => RegWriteM,
-		RegWriteW => RegWriteW,
-		ForwardAE => ForwardAE,
-		ForwardBE => ForwardBE,
-		ForwardAD => ForwardAD,
-		ForwardBD => ForwardBD
+		addr => PC,
+		d_out => Instruction
 	);
 
-RegSrcA_proc : process (ForwardAE, RD1E, result, ALUResultM) is begin
-	case ForwardAE is
-		when "00"   => RegSrcA <= RD1E;
-		when "01"   => RegSrcA <= result;
-		when "10"   => RegSrcA <= ALUResultM;
-		when others => RegSrcA <= RD1E;
-	end case;
-end process;
-
-RegSrcB_proc : process (ForwardBE, RD2E, result, ALUResultM) is begin
-	case ForwardBE is
-		when "00"   => RegSrcB <= RD2E;
-		when "01"   => RegSrcB <= result;
-		when "10"   => RegSrcB <= ALUResultM;
-		when others => RegSrcB <= RD2E;
-	end case;
-end process;
-
-Execute : entity work.Execute
+cpu : entity work.core
 	Port map(
 		clk         => clk_out1,
-		ALUControl  => ALUControlE,
-		ALUSrc      => ALUSrcE,
-		RegDst      => RegDstE,
-		RegSrcA     => RegSrcA,
-		RegSrcB     => RegSrcB,
-		RtDest      => RtE,
-		RdDest      => RdE,
-		SignImm     => ImmE,
-		ALUResult   => ALUResultE,
-		WriteData   => WriteDataE,
-		WriteReg    => WriteRegE
+		rst         => rst_debounce,
+		PC          => PC,
+		Instruction => Instruction,
+		dataAddr    => dataAddr,
+		d_in        => readData,
+		we          => we,
+		d_out       => writeData
 	);
 
-Mem : entity work.MemStage
+memD : entity work.DataMem
 	Port map(
-		clk          => clk_out1,
-		MemWrite     => MemWriteM,
-		ALUResult    => ALUResultM,
-		WriteData    => WriteDataM,
-		switches     => swNoMeta,
-		MemOut       => MemOutM,
-		active_digit => an_7seg,
-		seven_seg    => ag_seg
+		clk       => clk_out1,
+		w_en      => we,
+		addr      => dataAddr,
+		d_in      => writeData,
+		switches  => swNoMeta,
+		d_out     => readData,
+		seven_seg => displayed_number
 	);
 
-Wb : entity work.Writeback
+sev_seg : seg7
 	Port map(
-		MemtoReg    => MemtoRegW,
-		ALUResult   => ALUResultW,
-		ReadData    => MemOutW,
-		Result      => result
+		clock_50MHz      => clk,
+		displayed_number => displayed_number,
+		Anode_Activate   => an_7seg,
+		LED_out          => ag_seg
 	);
 
-stageDiv : process (clk_out1) is begin
+unmeta_proc : process (clk_out1) is begin
 	if rising_edge(clk_out1) then
-		RD1E        <= RD1D;
-		RtE         <= RtD;
-		RdE         <= RdD;
-		LinkE       <= LinkD;
-		LinkM       <= LinkE;
-		LinkW       <= LinkM;
-		ALUControlE <= ALUControlD;
-		RegWriteM   <= RegWriteE;
-		MemtoRegM   <= MemtoRegE;
-		MemtoRegW   <= MemtoRegM;
-		MemWriteM   <= MemWriteE;
-		RegWriteW   <= RegWriteM;
-		ALUResultM  <= ALUResultE;
-		ALUResultW  <= ALUResultM;
-		WriteDataM  <= WriteDataE;
-		WriteRegM   <= WriteRegE;
-		WriteRegW   <= WriteRegM;
-		MemOutW     <= MemOutM;
-		swMeta      <= sw;
-		swNoMeta    <= swMeta;
-		--rstMeta   <= rst;
-		--rstNoMeta <= rstMeta;
+		swMeta <= sw;
+		swNoMeta <= swMeta;
+		rstMeta <= rst;
+		rstNoMeta <= rstMeta;
 	end if;
 end process;
 
-D_reg : process (clk_out1) is begin
-	if rising_edge(clk_out1) then
-		if PCSrcF = '1' then
-			decodeIn <= (others => '0');
-			PCPlus4D <= (others => '0');
-		elsif StallD = '0' or PCSrcD = '1' then
-			decodeIn <= fetchOut;
-			PCPlus4D <= PCPlus4F;
-		end if;
-		PCSrcF    <= PCSrcD;
-		PCBranchF <= PCBranchD;
-	end if;
-end process;
-
-E_reg : process (clk_out1, FlushE) is begin
-	if rising_edge(clk_out1) then
-		if FlushE = '1' then
-			RegWriteE   <= '0';
-			MemWriteE   <= '0';
-			MemtoRegE   <= '0';
-			ALUSrcE     <= '0';
-			RegDstE     <= '0';
-			ImmE        <= (others => '0');
-			RD2E        <= (others => '0');
-			RsE         <= (others => '0');
-		else
-			RegWriteE   <= RegWriteD;
-			MemWriteE   <= MemWriteD;
-			MemtoRegE   <= MemtoRegD;
-			ALUSrcE     <= ALUSrcD;
-			RegDstE     <= RegDstD;
-			ImmE        <= ImmD;
-			RD2E        <= RD2D;
-			RsE         <= RsD;
-		end if;
-	end if;
-end process;
-	
-seg_dot <= '1';
---ALUResult <= ALUresultE;
 end Behavioral;

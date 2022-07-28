@@ -1,6 +1,6 @@
 library ieee;
 use ieee.std_logic_1164.all;
-use ieee.NUMERIC_STD.all;
+use ieee.numeric_std.all;
 
 entity InstructionFetch is 
 	Port (
@@ -9,8 +9,8 @@ entity InstructionFetch is
 		StallF      : in  std_logic;
 		PCSrc       : in  std_logic;
 		PCBranch    : in  std_logic_vector (27 downto 0);
-		PCPlus4     : out std_logic_vector (27 downto 0);
-		Instruction : out std_logic_vector (31 downto 0)
+		PC          : out std_logic_vector (27 downto 0);
+		PCPlus4     : out std_logic_vector (27 downto 0)
 	);
 end InstructionFetch;
 
@@ -24,15 +24,8 @@ component InstructionMem
 end component;
 
 signal PCtmp : std_logic_vector(27 downto 0) := (others => '0');
-signal PC : std_logic_vector(27 downto 0) := (others => '0');
 
 begin
-
-mem : InstructionMem
-	Port map (
-		addr  => PC,
-		d_out => Instruction
-	);
 				 
 fetch_proc : process (rst, clk) is begin
 	if rst = '1' then

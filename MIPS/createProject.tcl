@@ -9,7 +9,7 @@ proc setupFiles {} {
     add_files "src/sources_1/"
     add_files -fileset constrs_1 "src/constrs_1/"
     add_files -fileset sim_1 "src/sim_1/"
-    set_property FILE_TYPE {VHDL 2008} [get_files {multadd.vhd RegisterFileTB.vhd Multiplier.vhd Adder.vhd DataMem.vhd InstructionDecode.vhd alu4.vhd}]
+    set_property FILE_TYPE {VHDL 2008} [get_files {multadd.vhd RegisterFileTB.vhd Multiplier.vhd Adder.vhd DataMem.vhd InstructionDecode.vhd alu4.vhd Comparator.vhd InstructionFetch.vhd}]
 }
 
 proc genMMCM {} {

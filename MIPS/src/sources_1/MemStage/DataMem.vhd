@@ -11,7 +11,7 @@ entity DataMem is
 		d_in      : in  std_logic_vector ( BIT_DEPTH - 1 downto 0 );
 		switches  : in  std_logic_vector ( NUM_SWITCHES - 1 downto 0 );
 		d_out     : out std_logic_vector ( BIT_DEPTH - 1 downto 0 );
-		seven_seg : out std_logic_vector ( 15 downto 0 )
+		seven_seg : out std_logic_vector ( 15 downto 0 ) := (others => '0')
 	);
 end DataMem;
 

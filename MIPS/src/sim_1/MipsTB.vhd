@@ -12,7 +12,6 @@ architecture Behavioral of MipsTB is
 signal  clk    : std_logic;
 signal rst     : std_logic;
 signal sw      : std_logic_vector (7 downto 0);
---ALUResult : out std_logic_vector (31 downto 0);
 signal an_7seg : std_logic_vector (3 downto 0);
 signal ag_seg  : std_logic_vector (6 downto 0);
 signal seg_dot : std_logic;
@@ -23,7 +22,6 @@ uut : entity work.MIPS
 		clk     => clk,
 		rst     => rst,
 		sw      => sw,
-		--led     => led
 		an_7seg => an_7seg,
 		ag_seg  => ag_seg,
 		seg_dot => seg_dot
