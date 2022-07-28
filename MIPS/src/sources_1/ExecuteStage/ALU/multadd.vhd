@@ -6,66 +6,47 @@ use UNISIM.vcomponents.all;
 
 entity multadd is
 port(
-	clk : in std_logic;
-	subadd : in std_logic;
-	mul : in std_logic;
-	OpA : in std_logic_vector(31 downto 0);
-	OpB : in std_logic_vector(31 downto 0);
-	pout : out std_logic_vector(31 downto 0);
-	cout : out std_logic
+	clk    : in  std_logic;
+	subadd : in  std_logic;
+	mul    : in  std_logic;
+	OpA    : in  std_logic_vector(31 downto 0);
+	OpB    : in  std_logic_vector(31 downto 0);
+	pout   : out std_logic_vector(31 downto 0);
+	cout   : out std_logic
 );
 end multadd;
 architecture rtl of multadd is
-	signal ain : std_logic_vector(15 downto 0);
-	signal bin : std_logic_vector(17 downto 0);
-	signal cin : std_logic_vector(31 downto 0);
-	signal din : std_logic_vector(24 downto 0);
-	signal a : std_logic_vector(29 downto 0);
-	signal b : std_logic_vector(17 downto 0);
-	signal c : std_logic_vector(47 downto 0);
-	signal d : std_logic_vector(24 downto 0);
-	signal subaddtmp :std_logic;
-	signal p : std_logic_vector(47 downto 0);
-	signal opmode : std_logic_vector(6 downto 0);
-	signal alumode : std_logic_vector(3 downto 0);
-	signal inmode : std_logic_vector(4 downto 0);
-	signal couttmp : std_logic_vector(3 downto 0);
+	signal a         : std_logic_vector(29 downto 0);
+	signal b         : std_logic_vector(17 downto 0);
+	signal subaddtmp : std_logic;
+	signal p         : std_logic_vector(47 downto 0);
+	signal opmode    : std_logic_vector(6 downto 0);
+	signal alumode   : std_logic_vector(3 downto 0);
+	signal couttmp   : std_logic_vector(3 downto 0);
 begin
-	c <= 16b"0" & cin;
-	d <= din;
- 
+
 	cout <= couttmp(3);
-	cin <= OpB;
- 
-	bin <= OpA(17 downto 0);
- 
-	with mul select ain
-    	<= OpB(15 downto 0) when '1',
-       		"00" & OpA(31 downto 18) when others;
 
 	with mul select a
-	    <= 14b"0" & ain when '1',
-		   16b"0" & ain(13 downto 0) when others;
+	    <= 14b"0" & OpB(15 downto 0) when '1',
+		   16b"0" & OpA(31 downto 18) when others;
 	
 	with mul select b
-	    <= "00" & bin(15 downto 0) when '1',
-	      	bin when others;
+	    <= "00" & OpA(15 downto 0) when '1',
+            OpA(17 downto 0) when others;
 	
 	with mul select opmode
 	    <= "0000101" when '1',
 	 	   "0110011" when others;
 	
-	with subaddtmp select alumode
-	    <= "0001" when '1',
-	 	   "0000" when others;
-	
 	with mul select subaddtmp
 	    <= '0' when '1',
 	       	subadd when others;
 	
-	
-	inmode <= "00000";
- 
+	with subaddtmp select alumode
+	    <= "0001" when '1',
+	       "0000" when others;
+
    -- DSP48E1: 48-bit Multi-Functional Arithmetic Block
    --          Artix-7
    -- Xilinx HDL Language Template, version 2019.1
@@ -126,14 +107,14 @@ begin
       ALUMODE => ALUMODE,               -- 4-bit input: ALU control input
       CARRYINSEL => "000",         -- 3-bit input: Carry select input
       CLK => CLK,                       -- 1-bit input: Clock input
-      INMODE => INMODE,                 -- 5-bit input: INMODE control input
+      INMODE => "00000",                 -- 5-bit input: INMODE control input
       OPMODE => OPMODE,                 -- 7-bit input: Operation mode input
       -- Data: 30-bit (each) input: Data Ports
       A => a,                           -- 30-bit input: A data input
       B => b,                           -- 18-bit input: B data input
-      C => c,                           -- 48-bit input: C data input
+      C => 16b"0" & OpB,                           -- 48-bit input: C data input
       CARRYIN => subaddtmp,               -- 1-bit input: Carry input signal
-      D => d,                           -- 25-bit input: D data input
+      D => (others => '0'),                           -- 25-bit input: D data input
       -- Reset/Clock Enable: 1-bit (each) input: Reset/Clock Enable Inputs
       CEA1 => '0',                     -- 1-bit input: Clock enable input for 1st stage AREG
       CEA2 => '0',                     -- 1-bit input: Clock enable input for 2nd stage AREG
