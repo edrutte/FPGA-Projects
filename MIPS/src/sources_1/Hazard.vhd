@@ -75,8 +75,8 @@ ForwardBE_proc : process (RtE, RegWriteM, RegWriteW, WriteRegM, WriteRegW) is be
 	end if;
 end process;
 
-lwStall_proc : process (RsD, RsE, RtD, RtE, MemtoRegM) is begin
-	if (RsD = RsE or RtD = RtE) and MemtoRegM = '1' then
+lwStall_proc : process (RsD, RsE, RtD, RtE, MemtoRegE) is begin
+	if (RsD = RtE or RtD = RtE) and MemtoRegE = '1' then
 		lwStall <= '1';
 	else
 		lwStall <= '0';
