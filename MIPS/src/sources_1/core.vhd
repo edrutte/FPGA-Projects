@@ -45,13 +45,15 @@ signal LinkE : std_logic := '0';
 signal LinkM : std_logic := '0';
 signal LinkW : std_logic := '0';
 
-signal PCSrcF : std_logic := '0';
+signal BranchCalcD : std_logic := '0';
+
+signal TakeDelaySlot : std_logic := '1';
+
 signal PCSrcD : std_logic := '0';
 
 signal PCPlus4F : std_logic_vector(27 downto 0);
 signal PCPlus4D : std_logic_vector(27 downto 0);
 
-signal PCBranchF : std_logic_vector(27 downto 0);
 signal PCBranchD : std_logic_vector(27 downto 0);
 
 signal ALUControlD : std_logic_vector ( 3 downto 0 );
@@ -103,16 +105,21 @@ signal RegSrcA, RegSrcB : std_logic_vector ( BIT_DEPTH - 1 downto 0 );
 
 begin
 
-Fetch : entity work.InstructionFetch
-	Port map(
-		clk         => clk,
-		rst         => rst,
-		StallF      => StallF,
-		PCSrc       => PCSrcF,
-		PCBranch    => PCBranchF,
-		PC          => PC,
-		PCPlus4     => PCPlus4F
-	);
+F_reg : process (clk) is begin
+	if rising_edge(clk) then
+		if rst = '1' then
+			PC <= (others => '0');
+		elsif StallF = '0' then
+			if PCSrcD = '0' then
+				PC <= PCPlus4F;
+			else
+				PC <= PCBranchD;
+			end if;
+		end if;
+	end if;
+end process;
+
+PCPlus4F <= std_logic_vector(to_unsigned((to_integer(unsigned(PC)) + 4), 28));
 
 Decode : entity work.InstructionDecode
 	Port map(
@@ -130,6 +137,7 @@ Decode : entity work.InstructionDecode
 		MemtoReg     => MemtoRegD,
 		MemWrite     => MemWriteD,
 		Link         => LinkD,
+		CalcBranch   => BranchCalcD,
 		PCSrc        => PCSrcD,
 		ALUControl   => ALUControlD,
 		ALUSrc       => ALUSrcD,
@@ -142,6 +150,18 @@ Decode : entity work.InstructionDecode
 		ImmOut       => ImmD,
 		PCBranch     => PCBranchD
 	);
+
+D_reg : process (clk) is begin
+	if rising_edge(clk) then
+		if TakeDelaySlot = '0' then
+			decodeIn <= (others => '0');
+			PCPlus4D <= (others => '0');
+		elsif StallD = '0' then
+			decodeIn <= fetchOut;
+			PCPlus4D <= PCPlus4F;
+		end if;
+	end if;
+end process;
 	    
 Hazard : entity work.Hazard
 	Port map(
@@ -154,7 +174,7 @@ Hazard : entity work.Hazard
 		FlushE    => FlushE,
 		MemtoRegE => MemtoRegE,
 		MemtoRegM => MemToRegM,
-		BranchD   => PCSrcD,
+		BranchD   => BranchCalcD,
 		LinkM     => LinkM,
 		LinkW     => LinkW,
 		WriteRegE => WriteRegE,
@@ -203,6 +223,30 @@ Execute : entity work.Execute
 		WriteReg    => WriteRegE
 	);
 
+E_reg : process (clk, FlushE) is begin
+	if rising_edge(clk) then
+		if FlushE = '1' then
+			RegWriteE   <= '0';
+			MemWriteE   <= '0';
+			MemtoRegE   <= '0';
+			ALUSrcE     <= '0';
+			RegDstE     <= '0';
+			ImmE        <= (others => '0');
+			RD2E        <= (others => '0');
+			RsE         <= (others => '0');
+		else
+			RegWriteE   <= RegWriteD;
+			MemWriteE   <= MemWriteD;
+			MemtoRegE   <= MemtoRegD;
+			ALUSrcE     <= ALUSrcD;
+			RegDstE     <= RegDstD;
+			ImmE        <= ImmD;
+			RD2E        <= RD2D;
+			RsE         <= RsD;
+		end if;
+	end if;
+end process;
+
 Wb : entity work.Writeback
 	Port map(
 		MemtoReg    => MemtoRegW,
@@ -231,44 +275,6 @@ stageDiv : process (clk) is begin
 		WriteRegM   <= WriteRegE;
 		WriteRegW   <= WriteRegM;
 		MemOutW     <= MemOutM;
-	end if;
-end process;
-
-D_reg : process (clk) is begin
-	if rising_edge(clk) then
-		if PCSrcF = '1' then
-			decodeIn <= (others => '0');
-			PCPlus4D <= (others => '0');
-		elsif StallD = '0' or PCSrcD = '1' then
-			decodeIn <= fetchOut;
-			PCPlus4D <= PCPlus4F;
-		end if;
-		PCSrcF    <= PCSrcD;
-		PCBranchF <= PCBranchD;
-	end if;
-end process;
-
-E_reg : process (clk, FlushE) is begin
-	if rising_edge(clk) then
-		if FlushE = '1' then
-			RegWriteE   <= '0';
-			MemWriteE   <= '0';
-			MemtoRegE   <= '0';
-			ALUSrcE     <= '0';
-			RegDstE     <= '0';
-			ImmE        <= (others => '0');
-			RD2E        <= (others => '0');
-			RsE         <= (others => '0');
-		else
-			RegWriteE   <= RegWriteD;
-			MemWriteE   <= MemWriteD;
-			MemtoRegE   <= MemtoRegD;
-			ALUSrcE     <= ALUSrcD;
-			RegDstE     <= RegDstD;
-			ImmE        <= ImmD;
-			RD2E        <= RD2D;
-			RsE         <= RsD;
-		end if;
 	end if;
 end process;
 

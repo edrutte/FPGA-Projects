@@ -20,6 +20,7 @@ entity InstructionDecode is
 		MemtoReg     : out std_logic;
 		MemWrite     : out std_logic;
 		Link         : out std_logic;
+		CalcBranch   : out std_logic;
 		PCSrc        : out std_logic;
 		ALUControl   : out std_logic_vector (3 downto 0);
 		ALUSrc       : out std_logic;
@@ -36,6 +37,7 @@ end InstructionDecode;
 
 architecture SomeRandomName of InstructionDecode is
 
+signal RegBrCalc   : std_logic;
 signal RegImmBr    : std_logic;
 signal Opcode      : std_logic_vector (5 downto 0);
 signal CmpIn1      : std_logic_vector (BIT_DEPTH - 1 downto 0);
@@ -85,7 +87,7 @@ compare : entity work.Comparator
 		aeqz  => z
 	);
 
-OpA_proc : process(Opcode, Funct, RD1, sa) is begin
+OpA_proc : process(Opcode, Funct, RD1, sa, PCPlus4) is begin
 	case Opcode is
 		when "000000" =>
 			case Funct is
@@ -107,10 +109,21 @@ with Opcode select
 		'1' when "000010" | "000011",
 		'0' when others;
 
+with Opcode select
+	CalcBranch <=
+		'1' when "000100" | "000101" | "000111" | "000110",
+		RegBrCalc when "000001",
+		'0' when others;
+
 with RtDest select
 	RegImmBr <=
 		gt nor z when "00000",
 		gt or z when "00001",
+		'0' when others;
+
+with RtDest select
+	RegBrCalc <=
+		'1' when "00000" | "00001",
 		'0' when others;
 
 with Opcode select
