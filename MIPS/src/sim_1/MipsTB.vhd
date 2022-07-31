@@ -9,8 +9,8 @@ end MipsTB;
 
 architecture Behavioral of MipsTB is
 
-signal  clk    : std_logic;
-signal rst     : std_logic;
+signal clk     : std_logic := '0';
+signal rst     : std_logic := '1';
 signal sw      : std_logic_vector (7 downto 0);
 signal an_7seg : std_logic_vector (3 downto 0);
 signal ag_seg  : std_logic_vector (6 downto 0);
@@ -18,6 +18,7 @@ signal seg_dot : std_logic;
 
 begin
 uut : entity work.MIPS
+	generic map(SIM => TRUE)
 	port map(
 		clk     => clk,
 		rst     => rst,
@@ -27,17 +28,9 @@ uut : entity work.MIPS
 		seg_dot => seg_dot
 	);
 	
-clk_proc : process is begin
-	clk <= '0';
-	wait for 10 ns;
-	clk <= '1';
-	wait for 10 ns;
-end process;
+clk <= not clk after 5 ns;
 
 rst_proc : process is begin
-	--rst <= '0';
-	--wait until clk = '0';
-	rst <= '1';
 	wait until clk = '0';
 	rst <= '0';
 	wait;

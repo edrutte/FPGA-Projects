@@ -4,6 +4,9 @@ use ieee.numeric_std.all;
 use work.globals.all;
 
 entity MIPS is
+	Generic (
+		SIM : boolean := FALSE
+	);
 	Port ( 
 		clk	    : in  std_logic;
 		rst	    : in  std_logic;
@@ -68,19 +71,26 @@ begin
 	--end if;
 --end process;
 
-clk_div : clk_wiz_0
-   Port map(
-   		clk_out1 => clk_out1,
-   		clkIn    => clk
- 	);
+real_synth : if not SIM generate
+	clk_div : clk_wiz_0
+		Port map(
+			clk_out1 => clk_out1,
+			clkIn    => clk
+		);
 
-Debouncer : entity work.debounce
-	Port map(
-		clk          => clk,
-		rst          => '0',
-		button_in    => rstNoMeta,
-		button_out_p => rst_debounce
-	);
+	Debouncer : entity work.debounce
+		Port map(
+			clk          => clk,
+			rst          => '0',
+			button_in    => rstNoMeta,
+			button_out_p => rst_debounce
+		);
+end generate;
+
+fast_sim : if SIM generate
+	rst_debounce <= rst;
+	clk_out1 <= clk;
+end generate;
 
 memI : entity work.InstructionMem
 	Port map(
