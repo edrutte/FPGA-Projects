@@ -1,10 +1,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
-use work.globals.all;
-
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
 use ieee.numeric_std.all;
+use work.globals.all;
 
 entity Comparator is
     Port (
@@ -18,16 +15,18 @@ end Comparator;
 
 architecture SomeRandomName of Comparator is
 
-signal aneg : std_logic;
+signal aneg, aeqz_tmp : std_logic;
 
 begin
 
 aeqb <= '1' when a = b else '0';
 
-aeqz <= '1' when signed(a) = 0 else '0';
+aeqz_tmp <= '1' when to_integer(signed(a)) = 0 else '0';
 
 aneg <= a(BIT_DEPTH - 1);
 
-agtz <= aneg nor aeqz;
+agtz <= aneg nor aeqz_tmp;
+
+aeqz <= aeqz_tmp;
 
 end SomeRandomName;

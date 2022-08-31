@@ -19,17 +19,27 @@ end core;
 
 architecture Behavioral of core is
 
-signal fetchOut : std_logic_vector ( 31 downto 0 ) := ( others => '0' );
-signal decodeIn : std_logic_vector ( 31 downto 0 ) := ( others => '0' );
+signal fetchOut : std_logic_vector (31 downto 0 ) := (others => '0');
+signal decodeIn : std_logic_vector (31 downto 0 ) := (others => '0');
 
 signal RegWriteD : std_logic := '0';
 signal RegWriteE : std_logic := '0';
 signal RegWriteM : std_logic := '0';
 signal RegWriteW : std_logic := '0';
 
-signal WriteRegE : std_logic_vector ( LOG_PORT_DEPTH - 1 downto 0 );
-signal WriteRegM : std_logic_vector ( LOG_PORT_DEPTH - 1 downto 0 );
-signal WriteRegW : std_logic_vector ( LOG_PORT_DEPTH - 1 downto 0 );
+signal RegWriteHiD : std_logic := '0';
+signal RegWriteHiE : std_logic := '0';
+signal RegWriteHiM : std_logic := '0';
+signal RegWriteHiW : std_logic := '0';
+
+signal RegWriteLoD : std_logic := '0';
+signal RegWriteLoE : std_logic := '0';
+signal RegWriteLoM : std_logic := '0';
+signal RegWriteLoW : std_logic := '0';
+
+signal WriteRegE : std_logic_vector (LOG_PORT_DEPTH - 1 downto 0);
+signal WriteRegM : std_logic_vector (LOG_PORT_DEPTH - 1 downto 0);
+signal WriteRegW : std_logic_vector (LOG_PORT_DEPTH - 1 downto 0);
 
 signal MemtoRegD : std_logic := '0';
 signal MemtoRegE : std_logic := '0';
@@ -51,13 +61,13 @@ signal TakeDelaySlot : std_logic := '1';
 
 signal PCSrcD : std_logic := '0';
 
-signal PCPlus4F : std_logic_vector(27 downto 0);
-signal PCPlus4D : std_logic_vector(27 downto 0);
+signal PCPlus4F : std_logic_vector (27 downto 0);
+signal PCPlus4D : std_logic_vector (27 downto 0);
 
-signal PCBranchD : std_logic_vector(27 downto 0);
+signal PCBranchD : std_logic_vector (27 downto 0);
 
-signal ALUControlD : std_logic_vector ( 3 downto 0 );
-signal ALUControlE : std_logic_vector ( 3 downto 0 );
+signal ALUControlD : std_logic_vector (3 downto 0);
+signal ALUControlE : std_logic_vector (3 downto 0);
 
 signal ALUSrcD : std_logic;
 signal ALUSrcE : std_logic;
@@ -65,43 +75,46 @@ signal ALUSrcE : std_logic;
 signal RegDstD : std_logic;
 signal RegDstE : std_logic;
 
-signal RD1D : std_logic_vector ( BIT_DEPTH - 1 downto 0 );
-signal RD1E : std_logic_vector ( BIT_DEPTH - 1 downto 0 );
+signal RD1D : std_logic_vector (BIT_DEPTH - 1 downto 0);
+signal RD1E : std_logic_vector (BIT_DEPTH - 1 downto 0);
 
-signal RD2D : std_logic_vector ( BIT_DEPTH - 1 downto 0 );
-signal RD2E : std_logic_vector ( BIT_DEPTH - 1 downto 0 );
+signal RD2D : std_logic_vector (BIT_DEPTH - 1 downto 0);
+signal RD2E : std_logic_vector (BIT_DEPTH - 1 downto 0);
 
-signal RsD : std_logic_vector ( LOG_PORT_DEPTH - 1 downto 0 );
-signal RsE : std_logic_vector ( LOG_PORT_DEPTH - 1 downto 0 );
+signal RsD : std_logic_vector (LOG_PORT_DEPTH - 1 downto 0);
+signal RsE : std_logic_vector (LOG_PORT_DEPTH - 1 downto 0);
 
-signal RtD : std_logic_vector ( LOG_PORT_DEPTH - 1 downto 0 );
-signal RtE : std_logic_vector ( LOG_PORT_DEPTH - 1 downto 0 );
+signal RtD : std_logic_vector (LOG_PORT_DEPTH - 1 downto 0);
+signal RtE : std_logic_vector (LOG_PORT_DEPTH - 1 downto 0);
 
-signal RdD : std_logic_vector ( LOG_PORT_DEPTH - 1 downto 0 );
-signal RdE : std_logic_vector ( LOG_PORT_DEPTH - 1 downto 0 );
+signal RdD : std_logic_vector (LOG_PORT_DEPTH - 1 downto 0);
+signal RdE : std_logic_vector (LOG_PORT_DEPTH - 1 downto 0);
 
-signal ImmD : std_logic_vector ( BIT_DEPTH - 1 downto 0 );
-signal ImmE : std_logic_vector ( BIT_DEPTH - 1 downto 0 );
+signal ImmD : std_logic_vector (BIT_DEPTH - 1 downto 0);
+signal ImmE : std_logic_vector (BIT_DEPTH - 1 downto 0);
 
-signal ALUResultE : std_logic_vector ( BIT_DEPTH - 1 downto 0 );
-signal ALUResultM : std_logic_vector ( BIT_DEPTH - 1 downto 0 );
-signal ALUResultW : std_logic_vector ( BIT_DEPTH - 1 downto 0 );
+signal ALUResultE : std_logic_vector (BIT_DEPTH - 1 downto 0);
+signal ALUResultM : std_logic_vector (BIT_DEPTH - 1 downto 0);
+signal ALUResultW : std_logic_vector (BIT_DEPTH - 1 downto 0);
 
-signal WriteDataE : std_logic_vector ( BIT_DEPTH - 1 downto 0 );
-signal WriteDataM : std_logic_vector ( BIT_DEPTH - 1 downto 0 );
+signal HiWriteDataD : std_logic_vector (BIT_DEPTH - 1 downto 0);
+signal HiWriteDataE : std_logic_vector (BIT_DEPTH - 1 downto 0);
+signal HiWriteDataM : std_logic_vector (BIT_DEPTH - 1 downto 0);
+signal HiWriteDataW : std_logic_vector (BIT_DEPTH - 1 downto 0);
 
-signal MemOutM : std_logic_vector ( BIT_DEPTH - 1 downto 0 );
-signal MemOutW : std_logic_vector ( BIT_DEPTH - 1 downto 0 );
+signal WriteDataE : std_logic_vector (BIT_DEPTH - 1 downto 0);
+signal WriteDataM : std_logic_vector (BIT_DEPTH - 1 downto 0);
 
-signal result : std_logic_vector ( BIT_DEPTH - 1 downto 0 );
+signal MemOutM : std_logic_vector (BIT_DEPTH - 1 downto 0);
+signal MemOutW : std_logic_vector (BIT_DEPTH - 1 downto 0);
 
-signal StallF, StallD, FlushE : std_logic;
+signal result : std_logic_vector (BIT_DEPTH - 1 downto 0);
 
-signal ForwardAD, ForwardBD : std_logic;
+signal StallF, StallD, FlushE, ForwardAD, ForwardBD : std_logic;
 
-signal ForwardAE, ForwardBE : std_logic_vector ( 1 downto 0 );
+signal ForwardAE, ForwardBE : std_logic_vector (1 downto 0);
 
-signal RegSrcA, RegSrcB : std_logic_vector ( BIT_DEPTH - 1 downto 0 );
+signal RegSrcA, RegSrcB : std_logic_vector (BIT_DEPTH - 1 downto 0);
 
 begin
 
@@ -127,9 +140,12 @@ Decode : entity work.InstructionDecode
 		Instruction  => decodeIn,
 		RegWriteAddr => WriteRegW,
 		RegWriteData => result,
+		HiWriteData  => HiWriteDataW,
 		CmpData      => ALUResultM,
 		PCPlus4      => PCPlus4D,
 		RegWriteEn   => RegWriteW,
+		RegWriteHi   => RegWriteHiW,
+		RegWriteLo   => RegWriteLoW,
 		LinkWriteEn  => LinkW,
 		ForwardAD    => ForwardAD,
 		ForwardBD    => ForwardBD,
@@ -142,6 +158,8 @@ Decode : entity work.InstructionDecode
 		ALUControl   => ALUControlD,
 		ALUSrc       => ALUSrcD,
 		RegDst       => RegDstD,
+		we_hi        => RegWriteHiD,
+		we_lo        => RegWriteLoD,
 		OpA          => RD1D,
 		RD2          => RD2D,
 		RtDest       => RtD,
@@ -213,12 +231,15 @@ Execute : entity work.Execute
 		ALUControl  => ALUControlE,
 		ALUSrc      => ALUSrcE,
 		RegDst      => RegDstE,
+		RegWriteHi  => RegWriteHiE,
+		RegWriteLo  => RegWriteLoE,
 		RegSrcA     => RegSrcA,
 		RegSrcB     => RegSrcB,
 		RtDest      => RtE,
 		RdDest      => RdE,
 		SignImm     => ImmE,
 		ALUResult   => ALUResultE,
+		Hi          => HiWriteDataE,
 		WriteData   => WriteDataE,
 		WriteReg    => WriteRegE
 	);
@@ -226,6 +247,8 @@ Execute : entity work.Execute
 E_reg : process (clk, FlushE) is begin
 	if rising_edge(clk) then
 		if FlushE = '1' then
+			RegWriteHiE <= '0';
+			RegWriteLoE <= '0';
 			RegWriteE   <= '0';
 			MemWriteE   <= '0';
 			MemtoRegE   <= '0';
@@ -235,6 +258,8 @@ E_reg : process (clk, FlushE) is begin
 			RD2E        <= (others => '0');
 			RsE         <= (others => '0');
 		else
+			RegWriteHiE <= RegWriteHiD;
+			RegWriteLoE <= RegWriteLoD;
 			RegWriteE   <= RegWriteD;
 			MemWriteE   <= MemWriteD;
 			MemtoRegE   <= MemtoRegD;
@@ -257,31 +282,37 @@ Wb : entity work.Writeback
 
 stageDiv : process (clk) is begin
 	if rising_edge(clk) then
-		RD1E        <= RD1D;
-		RtE         <= RtD;
-		RdE         <= RdD;
-		LinkE       <= LinkD;
-		LinkM       <= LinkE;
-		LinkW       <= LinkM;
-		ALUControlE <= ALUControlD;
-		RegWriteM   <= RegWriteE;
-		MemtoRegM   <= MemtoRegE;
-		MemtoRegW   <= MemtoRegM;
-		MemWriteM   <= MemWriteE;
-		RegWriteW   <= RegWriteM;
-		ALUResultM  <= ALUResultE;
-		ALUResultW  <= ALUResultM;
-		WriteDataM  <= WriteDataE;
-		WriteRegM   <= WriteRegE;
-		WriteRegW   <= WriteRegM;
-		MemOutW     <= MemOutM;
+		RD1E         <= RD1D;
+		RtE          <= RtD;
+		RdE          <= RdD;
+		LinkE        <= LinkD;
+		LinkM        <= LinkE;
+		LinkW        <= LinkM;
+		ALUControlE  <= ALUControlD;
+		RegWriteM    <= RegWriteE;
+		RegWriteHiM  <= RegWriteHiE;
+		RegWriteHiW  <= RegWriteHiM;
+		RegWriteLoM  <= RegWriteLoE;
+		RegWriteLoW  <= RegWriteLoM;
+		MemtoRegM    <= MemtoRegE;
+		MemtoRegW    <= MemtoRegM;
+		MemWriteM    <= MemWriteE;
+		RegWriteW    <= RegWriteM;
+		ALUResultM   <= ALUResultE;
+		ALUResultW   <= ALUResultM;
+		WriteDataM   <= WriteDataE;
+		WriteRegM    <= WriteRegE;
+		WriteRegW    <= WriteRegM;
+		MemOutW      <= MemOutM;
+		HiWriteDataM <= HiWriteDataE;
+		HiWriteDataW <= HiWriteDataM;
 	end if;
 end process;
 
 fetchOut <= Instruction;
-dataAddr <= ALUResultM ( DATA_ADDR_BITS - 1 downto 0 );
-MemOutM <= d_in;
-d_out <= WriteDataM;
-we <= MemWriteM;
+dataAddr <= ALUResultM (DATA_ADDR_BITS - 1 downto 0);
+MemOutM  <= d_in;
+d_out    <= WriteDataM;
+we       <= MemWriteM;
 
 end Behavioral;

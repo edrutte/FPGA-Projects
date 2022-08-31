@@ -23,7 +23,7 @@ signal clk              : std_logic := '0';
 signal rst              : std_logic := '1';
 signal seg_dot          : std_logic;
 
-shared variable br_prg : mem_type:= (
+constant br_prg : mem_type:= (
 
     x"20", x"10", x"ff", x"ff", --addi $s0, $zero, -0x1
 	x"20", x"08", x"00", x"01", --addi $t0, $zero, 0x1
@@ -54,43 +54,29 @@ shared variable br_prg : mem_type:= (
 	others => (others => '0')
 );
 
-shared variable fib_prg : mem_type := (
+constant hilo_prg : mem_type := (
 
-	x"20", x"10", x"00", x"00", --addi $s0, $zero, 0x0 ;save pointer
-	x"20", x"11", x"10", x"23", --addi $s1, $zero, 0x1023 ;7seg pointer
-	x"20", x"08", x"00", x"00", --addi $t0, $zero, 0x0 ;fib(0) = 0
-	x"20", x"09", x"00", x"01", --addi $t1, $zero, 0x1 ;fib(1) = 1
-	x"01", x"28", x"40", x"20", --add $t0, $t1, $t0 ;next fib
-	x"ae", x"08", x"00", x"00", --sw $t0, 0x0($s0) ;store
-	x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1 ;store pointer++
-	x"01", x"28", x"48", x"20", --add $t1, $t1, $t0 ;next fib
-	x"ae", x"09", x"00", x"00", --sw $t1, 0x0($s0) ;store
-	x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1 ;store pointer++
-	x"01", x"28", x"40", x"20", --add $t0, $t1, $t0 ;next fib
-	x"ae", x"08", x"00", x"00", --sw $t0, 0x0($s0) ;store
-	x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1 ;store pointer++
-	x"01", x"28", x"48", x"20", --add $t1, $t1, $t0 ;next fib
-	x"ae", x"09", x"00", x"00", --sw $t1, 0x0($s0) ;store
-	x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1 ;store pointer++
-	x"01", x"28", x"40", x"20", --add $t0, $t1, $t0 ;next fib
-	x"ae", x"08", x"00", x"00", --sw $t0, 0x0($s0) ;store
-	x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1 ;store pointer++
-	x"01", x"28", x"48", x"20", --add $t1, $t1, $t0 ;next fib
-	x"ae", x"09", x"00", x"00", --sw $t1, 0x0($s0) ;store
-	x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1 ;store pointer++
-	x"01", x"28", x"40", x"20", --add $t0, $t1, $t0 ;next fib
-	x"ae", x"08", x"00", x"00", --sw $t0, 0x0($s0) ;store
-	x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1 ;store pointer++
-	x"01", x"28", x"48", x"20", --add $t1, $t1, $t0 ;next fib
-	x"ae", x"09", x"00", x"00", --sw $t1, 0x0($s0) ;store
-	x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1 ;store pointer++
-	x"01", x"28", x"40", x"20", --add $t0, $t1, $t0 ;next fib
-	x"ae", x"08", x"00", x"00", --sw $t0, 0x0($s0) ;store
-	x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1 ;store pointer++
-	x"01", x"28", x"48", x"20", --add $t1, $t1, $t0 ;next fib
-	x"ae", x"09", x"00", x"00", --sw $t1, 0x0($s0) ;store
-	x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1 ;store pointer++
-	x"ae", x"29", x"00", x"00", --sw $t1 0x0($s1) ;store to 7seg
+	x"20", x"10", x"00", x"00", --addi $s0, $zero, 0x0
+	x"20", x"08", x"13", x"37", --addi $t0, $zero, 0x1337
+	x"00", x"08", x"44", x"00", --sll $t0, $t0, 0x10
+	x"21", x"08", x"24", x"07", --addi $t0, $t0, 0x2407
+	x"21", x"29", x"7a", x"d3", --addi $t1, $t1, 0x7ad3
+	x"00", x"09", x"4c", x"00", --sll $t1, $t1, 0x10
+	x"21", x"29", x"60", x"47", --addi $t1, $t1, 0x6047
+	x"01", x"09", x"00", x"18", --mult $t0, $t1
+	x"00", x"00", x"00", x"00", --noop because reads/writes of hi/lo must be seperated by 3 instructions
+	x"00", x"00", x"00", x"00", --noop because reads/writes of hi/lo must be seperated by 3 instructions
+	x"00", x"00", x"50", x"10", --mfhi $t2
+	x"00", x"00", x"58", x"12", --mflo $t3
+	x"ae", x"0a", x"00", x"00", --sw $t2, 0x0($s0)
+	x"01", x"20", x"00", x"11", --mthi $t1
+	x"01", x"00", x"00", x"13", --mtlo $t0
+	x"ae", x"0b", x"00", x"01", --sw $t3, 0x1($s0)
+	x"00", x"00", x"58", x"10", --mfhi $t3
+	x"00", x"00", x"50", x"12", --mflo $t2
+	x"ae", x"0b", x"00", x"02", --sw $t3, 0x2($s0)
+	x"00", x"00", x"00", x"00", --noop so that wait until we = '1' will catch each store
+	x"ae", x"0a", x"00", x"03", --sw $t2, 0x3($s0)
 
 	others => (others => '0')
 );
@@ -104,10 +90,12 @@ component seg7 is
 	);
 end component;
 
+constant test_prg : mem_type := br_prg; --Change this to change the test
+
 begin
 
-memIbr : entity work.InstructionMem
-	Generic map (PRG => br_prg)
+memI : entity work.InstructionMem
+	Generic map (PRG => test_prg)
 	Port map(
 		addr => PC,
 		d_out => Instruction
@@ -146,94 +134,124 @@ sev_seg : seg7
 	
 clk <= not clk after 5 ns;
 
-test_proc : process is begin
-	wait until clk = '0';
-	rst <= '0';
-	wait until we = '1';
-	assert writeData = 32x"1"
-		report "Expected write #1 in branch test to be " & to_string(32x"1") & " but got " & to_string(writeData)
-		severity error;
-	wait until we = '1';
-	assert writeData = x"FFFFFFFE"
-		report "Expected write #2 in branch test to be " & to_string(x"FFFFFFFE") & " but got " & to_string(writeData)
-		severity error;
-	wait until we = '1';
-	assert writeData = x"FFFFFFFE"
-		report "Expected write #3 in branch test to be " & to_string(x"FFFFFFFE") & " but got " & to_string(writeData)
-		severity error;
-	wait until we = '1';
-	assert writeData = 32x"5"
-		report "Expected write #4 in branch test to be " & to_string(32x"5") & " but got " & to_string(writeData)
-		severity error;
-	wait until we = '1';
-	assert writeData = 32x"5"
-		report "Expected write #5 in branch test to be " & to_string(32x"5") & " but got " & to_string(writeData)
-		severity error;
-	wait until we = '1';
-	assert writeData = 32x"2"
-		report "Expected write #6 in branch test to be " & to_string(32x"2") & " but got " & to_string(writeData)
-		severity error;
-	wait until we = '1';
-	assert writeData = 32x"0"
-		report "Expected write #7 in branch test to be " & to_string(32x"0") & " but got " & to_string(writeData)
-		severity error;
-	wait until we = '1';
-	assert writeData = 32x"0"
-		report "Expected write #8 in branch test to be " & to_string(32x"0") & " but got " & to_string(writeData)
-		severity error;
-	wait until we = '1';
-	assert writeData = x"FFFFFFFD"
-		report "Expected write #9 in branch test to be " & to_string(x"FFFFFFFD") & " but got " & to_string(writeData)
-		severity error;
-	wait until we = '1';
-	assert writeData = x"FFFFFFFD"
-		report "Expected write #10 in branch test to be " & to_string(x"FFFFFFFD") & " but got " & to_string(writeData)
-		severity error;
-	wait until we = '1';
-	assert writeData = x"FFFFFFFD"
-		report "Expected write #11 in branch test to be " & to_string(x"FFFFFFFD") & " but got " & to_string(writeData)
-		severity error;
-	wait until we = '1';
-	assert writeData = 32x"4"
-		report "Expected write #12 in branch test to be " & to_string(32x"4") & " but got " & to_string(writeData)
-		severity error;
-	wait until we = '1';
-	assert writeData = 32x"4"
-		report "Expected write #13 in branch test to be " & to_string(32x"4") & " but got " & to_string(writeData)
-		severity error;
-	wait until we = '1';
-	assert writeData = 32x"1"
-		report "Expected write #14 in branch test to be " & to_string(32x"1") & " but got " & to_string(writeData)
-		severity error;
-	wait until we = '1';
-	assert writeData = x"FFFFFFFF"
-		report "Expected write #15 in branch test to be " & to_string(x"FFFFFFFF") & " but got " & to_string(writeData)
-		severity error;
-	wait until we = '1';
-	assert writeData = 32x"6"
-		report "Expected write #16 in branch test to be " & to_string(32x"6") & " but got " & to_string(writeData)
-		severity error;
-	wait until we = '1';
-	assert writeData = 32x"6"
-		report "Expected write #17 in branch test to be " & to_string(32x"6") & " but got " & to_string(writeData)
-		severity error;
-	wait until we = '1';
-	assert writeData = 32x"3"
-		report "Expected write #18 in branch test to be " & to_string(32x"3") & " but got " & to_string(writeData)
-		severity error;
-	wait until we = '1';
-	assert writeData = 32x"1"
-		report "Expected write #19 in branch test to be " & to_string(32x"1") & " but got " & to_string(writeData)
-		severity error;
-	wait until we = '1';
-	assert writeData = 32x"1"
-		report "Expected write #20 in branch test to be " & to_string(32x"1") & " but got " & to_string(writeData)
-		severity error;
-	wait until we = '1';
-	assert FALSE
-		report "End of testbench"
-		severity failure;
-end process;
+br_test : if test_prg = br_prg generate
+	test_proc : process is begin
+		wait until clk = '0';
+		rst <= '0';
+		wait until we = '1';
+		assert writeData = 32x"1"
+			report "Expected write #1 in branch test to be " & to_hex_string(32x"1") & " but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = x"FFFFFFFE"
+			report "Expected write #2 in branch test to be " & to_hex_string(x"FFFFFFFE") & " but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = x"FFFFFFFE"
+			report "Expected write #3 in branch test to be " & to_hex_string(x"FFFFFFFE") & " but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"5"
+			report "Expected write #4 in branch test to be " & to_hex_string(32x"5") & " but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"5"
+			report "Expected write #5 in branch test to be " & to_hex_string(32x"5") & " but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"2"
+			report "Expected write #6 in branch test to be " & to_hex_string(32x"2") & " but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"0"
+			report "Expected write #7 in branch test to be " & to_hex_string(32x"0") & " but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"0"
+			report "Expected write #8 in branch test to be " & to_hex_string(32x"0") & " but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = x"FFFFFFFD"
+			report "Expected write #9 in branch test to be " & to_hex_string(x"FFFFFFFD") & " but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = x"FFFFFFFD"
+			report "Expected write #10 in branch test to be " & to_hex_string(x"FFFFFFFD") & " but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = x"FFFFFFFD"
+			report "Expected write #11 in branch test to be " & to_hex_string(x"FFFFFFFD") & " but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"4"
+			report "Expected write #12 in branch test to be " & to_hex_string(32x"4") & " but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"4"
+			report "Expected write #13 in branch test to be " & to_hex_string(32x"4") & " but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"1"
+			report "Expected write #14 in branch test to be " & to_hex_string(32x"1") & " but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = x"FFFFFFFF"
+			report "Expected write #15 in branch test to be " & to_hex_string(x"FFFFFFFF") & " but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"6"
+			report "Expected write #16 in branch test to be " & to_hex_string(32x"6") & " but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"6"
+			report "Expected write #17 in branch test to be " & to_hex_string(32x"6") & " but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"3"
+			report "Expected write #18 in branch test to be " & to_hex_string(32x"3") & " but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"1"
+			report "Expected write #19 in branch test to be " & to_hex_string(32x"1") & " but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"1"
+			report "Expected write #20 in branch test to be " & to_hex_string(32x"1") & " but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert FALSE
+			report "End of testbench"
+			severity failure;
+	end process;
+end generate;
+
+hilo_test : if test_prg = hilo_prg generate
+	test_proc : process is begin
+		wait until clk = '0';
+		rst <= '0';
+		wait until we = '1';
+		assert writeData = x"093824D8"
+			report "Expected result of multiply to be " & to_hex_string(x"093824D809929DF1") & " but got " & to_hex_string(writeData) & " for hi instead of " & to_hex_string(x"093824D8")
+			severity error;
+		wait until we = '1';
+		assert writeData = x"09929DF1"
+			report "Expected result of multiply to be " & to_hex_string(x"093824D809929DF1") & " but got " & to_hex_string(writeData) & " for lo instead of " & to_hex_string(x"09929DF1")
+			severity error;
+		wait until we = '1';
+		assert writeData = x"7AD36047"
+			report "Expected round-trip of " & to_hex_string(x"7AD36047") & " through hi to remain unchanged but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = x"13372407"
+			report "Expected round-trip of " & to_hex_string(x"13372407") & " through lo to remain unchanged but got " & to_hex_string(writeData)
+			severity error;
+		wait until clk = '0';
+		wait until clk = '0'; --wait a couple of clocks for data to get to memory
+		assert FALSE
+			report "End of testbench"
+			severity failure;
+	end process;
+end generate;
 
 sw <= "10010110";
 

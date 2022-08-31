@@ -5,8 +5,8 @@ use work.globals.all;
 entity Writeback is
 	Port(
 		MemtoReg            : in  std_logic;
-		ALUResult, ReadData : in  std_logic_vector ( BIT_DEPTH - 1 downto 0 );
-		Result              : out std_logic_vector ( BIT_DEPTH - 1 downto 0 )
+		ALUResult, ReadData : in  std_logic_vector (BIT_DEPTH - 1 downto 0);
+		Result              : out std_logic_vector (BIT_DEPTH - 1 downto 0)
 	);
 end entity;
 

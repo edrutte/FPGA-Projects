@@ -7,9 +7,9 @@ proc init {} {
 
 proc setupFiles {} {
     add_files "src/sources_1/"
-    add_files -fileset constrs_1 "src/constrs_1/"
-    add_files -fileset sim_1 "src/sim_1/"
-    set_property FILE_TYPE {VHDL 2008} [get_files {multadd.vhd RegisterFileTB.vhd Multiplier.vhd Adder.vhd DataMem.vhd InstructionDecode.vhd alu4.vhd Comparator.vhd InstructionFetch.vhd}]
+    add_files -fileset constrs_1 "src/constrs_1/mercury2_baseboard.xdc"
+    add_files -fileset sim_1 "src/sim_1/MipsTB.vhd"
+    set_property FILE_TYPE {VHDL 2008} [get_files {Multiplier.vhd Adder.vhd DataMem.vhd InstructionDecode.vhd MipsTB.vhd}]
 }
 
 proc genMMCM {} {

@@ -10,9 +10,12 @@ entity InstructionDecode is
 		Instruction  : in  std_logic_vector (31 downto 0);
 		RegWriteAddr : in  std_logic_vector (LOG_PORT_DEPTH - 1 downto 0);
 		RegWriteData : in  std_logic_vector (BIT_DEPTH - 1 downto 0);
+		HiWriteData  : in  std_logic_vector (BIT_DEPTH - 1 downto 0);
 		CmpData      : in  std_logic_vector (BIT_DEPTH - 1 downto 0);
 		PCPlus4      : in  std_logic_vector (27 downto 0);
 		RegWriteEn   : in  std_logic;
+		RegWriteHi   : in  std_logic;
+		RegWriteLo   : in  std_logic;
 		LinkWriteEn  : in  std_logic;
 		ForwardAD    : in  std_logic;
 		ForwardBD    : in  std_logic;
@@ -25,6 +28,8 @@ entity InstructionDecode is
 		ALUControl   : out std_logic_vector (3 downto 0);
 		ALUSrc       : out std_logic;
 		RegDst       : out std_logic;
+		we_hi        : out std_logic;
+		we_lo        : out std_logic;
 		OpA          : out std_logic_vector (BIT_DEPTH - 1 downto 0);
 		RD2          : out std_logic_vector (BIT_DEPTH - 1 downto 0);
 		RtDest       : out std_logic_vector (LOG_PORT_DEPTH - 1 downto 0);
@@ -43,6 +48,8 @@ signal Opcode      : std_logic_vector (5 downto 0);
 signal CmpIn1      : std_logic_vector (BIT_DEPTH - 1 downto 0);
 signal CmpIn2      : std_logic_vector (BIT_DEPTH - 1 downto 0);
 signal Funct       : std_logic_vector (5 downto 0);
+signal rd_hi       : std_logic;
+signal rd_lo       : std_logic;
 signal RD1         : std_logic_vector (BIT_DEPTH - 1 downto 0);
 signal eq          : std_logic;
 signal gt          : std_logic;
@@ -62,7 +69,12 @@ CU : entity work.ControlUnit
 		MemWrite   => MemWrite,
 		ALUControl => ALUControl,
 		ALUSrc     => ALUSrc,
-		RegDst     => RegDst
+		RegDst     => RegDst,
+		CalcBranch => CalcBranch,
+		rd_hi      => rd_hi,
+		rd_lo      => rd_lo,
+		we_hi      => we_hi,
+		we_lo      => we_lo
 	);
 		
 RegFile : entity work.RegisterFile
@@ -72,7 +84,12 @@ RegFile : entity work.RegisterFile
 		Addr2 => Instruction (20 downto 16),
 		Addr3 => RegWriteAddr,
 		wd    => RegWriteData,
+		wd_hi => HiWriteData,
+		rd_hi => rd_hi,
+		rd_lo => rd_lo,
 		we    => RegWriteEn,
+		we_hi => RegWriteHi,
+		we_lo => RegWriteLo,
 		Link  => LinkWriteEn,
 		RD1   => RD1,
 		RD2   => RD2
@@ -109,22 +126,12 @@ with Opcode select
 		'1' when "000010" | "000011",
 		'0' when others;
 
-with Opcode select
-	CalcBranch <=
-		'1' when "000100" | "000101" | "000111" | "000110",
-		RegBrCalc when "000001",
-		'0' when others;
-
 with RtDest select
 	RegImmBr <=
 		gt nor z when "00000",
 		gt or z when "00001",
 		'0' when others;
 
-with RtDest select
-	RegBrCalc <=
-		'1' when "00000" | "00001",
-		'0' when others;
 
 with Opcode select
 	PCBranch <=
@@ -141,6 +148,6 @@ RdDest <= Instruction (15 downto 11) when Link = '0' else "11111";
 sa     <= Instruction (10 downto 6);
 Funct  <= Instruction (5 downto 0);
 
-ImmOut <= std_logic_vector(to_signed(to_integer(signed(Instruction (15 downto 0))), BIT_DEPTH));
+ImmOut <= std_logic_vector(to_signed(to_integer(signed(Instruction(15 downto 0))), BIT_DEPTH));
 
 end SomeRandomName;
