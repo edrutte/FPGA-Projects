@@ -1,47 +1,19 @@
-----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
--- Create Date: 04/27/2021 09:58:17 AM
--- Design Name: 
--- Module Name: UART_Rx - SomeRandomName
--- Project Name: 
--- Target Devices: 
--- Tool Versions: 
--- Description: 
--- 
--- Dependencies: 
--- 
--- Revision:
--- Revision 0.01 - File Created
--- Additional Comments:
--- 
-----------------------------------------------------------------------------------
-
-
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
-
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
-use IEEE.NUMERIC_STD.ALL;
-
--- Uncomment the following library declaration if instantiating
--- any Xilinx leaf cells in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
 entity UART_Rx is
-    Port ( 
-    	   clk : in std_logic;
-    	   rx_in : in STD_LOGIC;
-    	   rx_ready : out std_logic;
-           rx_data : out STD_LOGIC_VECTOR (7 downto 0));
+	Port (
+		clk      : in  std_logic;
+		rx_in    : in  std_logic;
+		rx_ready : out std_logic;
+		rx_data  : out std_logic_vector (7 downto 0)
+	);
 end UART_Rx;
 
 architecture SomeRandomName of UART_Rx is
 
-type state_type is (Hold, Got_start, Recieve, Got_end);
+type state_type is (hold, start_bit, recieve, end_bit);
 signal state, next_state : state_type := Hold;
 
 signal rx_data_buf : std_logic_vector (7 downto 0) := (others => '0');
@@ -59,7 +31,7 @@ end process;
 
 bit_count_proc : process (clk) is begin
 	if rising_edge(clk) then
-		if next_state = Recieve then
+		if next_state = recieve then
 			bit_count <= bit_count + 1;
 		else
 			bit_count <= (others => '0');
@@ -68,18 +40,16 @@ bit_count_proc : process (clk) is begin
 end process;
 
 rx_data_proc : process (next_state, rx_data_sr, rx_data_buf) is begin
-	--if rising_edge(clk) then
-		if next_state = Got_end then
-			rx_data <= rx_data_sr;
-		else
-			rx_data <= rx_data_buf;
-		end if;
-	--end if;
+	if next_state = end_bit then
+		rx_data <= rx_data_sr;
+	else
+		rx_data <= rx_data_buf;
+	end if;
 end process;
 
 rx_data_buf_proc : process (clk) is begin
 	if rising_edge(clk) then
-		if next_state = Got_end then
+		if next_state = end_bit then
 			rx_data_buf <= rx_data_sr;
 		else
 			rx_data_buf <= rx_data_buf;
@@ -89,7 +59,7 @@ end process;
 
 rx_data_sr_proc : process (clk) is begin
 	if rising_edge(clk) then
-		if next_state = Got_start then
+		if next_state = start_bit then
 			rx_data_sr <= "00000000";
 		elsif next_state = Recieve then
 			rx_data_sr <= rx_in & rx_data_sr (7 downto 1);
@@ -101,27 +71,27 @@ end process;
 
 next_state_proc : process (state, rx_in, bit_count) is begin
 	case state is
-		when Hold =>
+		when hold =>
 			if rx_in = '0' then
-				next_state <= Got_start;
+				next_state <= start_bit;
 			else
-				next_state <= Hold;
+				next_state <= hold;
 			end if;
-		when Got_start => next_state <= Recieve;
-		when Recieve =>
+		when start_bit => next_state <= recieve;
+		when recieve =>
 			if bit_count = "1000" and rx_in = '1' then
-				next_state <= Got_end;
+				next_state <= end_bit;
 			elsif bit_count = "1000" and rx_in = '0' then
-				next_state <= Hold;
+				next_state <= hold;
 			else
-				next_state <= Recieve;
+				next_state <= recieve;
 			end if;
-		when Got_end => next_state <= Hold;
+		when end_bit => next_state <= hold;
 	end case;
 end process;
 
 rx_ready_proc : process (next_state) is begin
-	if next_state = Got_end then
+	if next_state = end_bit then
 		rx_ready <= '1';
 	else
 		rx_ready <= '0';

@@ -1,44 +1,15 @@
-----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
--- Create Date: 04/27/2021 09:58:17 AM
--- Design Name: 
--- Module Name: UART_Tx - SomeRandomName
--- Project Name: 
--- Target Devices: 
--- Tool Versions: 
--- Description: 
--- 
--- Dependencies: 
--- 
--- Revision:
--- Revision 0.01 - File Created
--- Additional Comments:
--- 
-----------------------------------------------------------------------------------
-
-
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
-
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
-use IEEE.NUMERIC_STD.ALL;
-
--- Uncomment the following library declaration if instantiating
--- any Xilinx leaf cells in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
 entity UART_Tx is
-    Port ( 
-    	   clk : in std_logic;
-    	   go : in std_logic;
-           tx_data : in STD_LOGIC_VECTOR (7 downto 0);
-           busy : out std_logic;
-           tx_out : out STD_LOGIC
-         );
+	Port (
+		clk     : in  std_logic;
+		go      : in  std_logic;
+		tx_data : in  std_logic_vector (7 downto 0);
+		busy    : out std_logic;
+		tx_out  : out std_logic
+	);
 end UART_Tx;
 
 architecture SomeRandomName of UART_Tx is
@@ -106,15 +77,13 @@ busy_proc : process (state) is begin
 end process;
 
 tx_out_proc : process (state, tx_data_buf) is begin
-	--if rising_edge(clk) then
-		if state = Init then
-			tx_out <= '0';
-		elsif state = Send then
-			tx_out <= tx_data_buf(0);
-		else
-			tx_out <= '1';
-		end if;
-	--end if;
+	if state = Init then
+		tx_out <= '0';
+	elsif state = Send then
+		tx_out <= tx_data_buf(0);
+	else
+		tx_out <= '1';
+	end if;
 end process;
 			
 end SomeRandomName;
