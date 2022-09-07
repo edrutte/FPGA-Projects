@@ -11,20 +11,18 @@ entity Hazard is
 		MemtoRegE : in  std_logic;
 		MemtoRegM : in  std_logic;
 		BranchD   : in  std_logic;
-		LinkM     : in  std_logic;
-		LinkW     : in  std_logic;
-		RsD       : in  std_logic_vector ( 4 downto 0 );
-		RtD       : in  std_logic_vector ( 4 downto 0 );
-		RsE       : in  std_logic_vector ( 4 downto 0 );
-		RtE       : in  std_logic_vector ( 4 downto 0 );
-		WriteRegE : in  std_logic_vector ( 4 downto 0 );
-		WriteRegM : in  std_logic_vector ( 4 downto 0 );
-		WriteRegW : in  std_logic_vector ( 4 downto 0 );
+		RsD       : in  std_logic_vector (4 downto 0);
+		RtD       : in  std_logic_vector (4 downto 0);
+		RsE       : in  std_logic_vector (4 downto 0);
+		RtE       : in  std_logic_vector (4 downto 0);
+		WriteRegE : in  std_logic_vector (4 downto 0);
+		WriteRegM : in  std_logic_vector (4 downto 0);
+		WriteRegW : in  std_logic_vector (4 downto 0);
 		StallF    : out std_logic;
 		StallD    : out std_logic;
 		FlushE    : out std_logic;
-		ForwardAE : out std_logic_vector ( 1 downto 0 );
-		ForwardBE : out std_logic_vector ( 1 downto 0 );
+		ForwardAE : out std_logic_vector (1 downto 0);
+		ForwardBE : out std_logic_vector (1 downto 0);
 		ForwardAD : out std_logic;
 		ForwardBD : out std_logic
 	);
@@ -40,44 +38,52 @@ signal branchStall     : std_logic;
 begin
 
 ForwardAD_proc : process (RsD, WriteRegM, RegWriteM) is begin
-	if RsD /= "00000" and (((RsD = WriteRegM) and (RegWriteM = '1')) or ((RsD = "11111") and (LinkM = '1'))) then
-		ForwardAD <= '1';
+	if RsD /= "00000" and (RsD = WriteRegM) then
+		ForwardAD <= RegWriteM;
 	else
 		ForwardAD <= '0';
 	end if;
 end process;
 
 ForwardAE_proc : process (RsE, RegWriteM, RegWriteW, WriteRegM, WriteRegW) is begin
-	if RsE /= "00000" and (((RsE = WriteRegM) and (RegWriteM = '1')) or ((RsE = "11111") and (LinkM = '1'))) then
-		ForwardAE <= "10";
-	elsif (RsE /= "00000") and (((RsE = WriteRegW) and (RegWriteW = '1')) or ((RsE = "11111") and (LinkW = '1'))) then
-		ForwardAE <= "01";
+	if RsE /= "00000" then
+		if (RsE = WriteRegM) and (RegWriteM = '1') then
+			ForwardAE <= "10";
+		elsif RsE = WriteRegW then
+			ForwardAE <= '0' & RegWriteW;
+		else
+			ForwardAE <= "00";
+		end if;
 	else
 		ForwardAE <= "00";
 	end if;
 end process;
 
 ForwardBD_proc : process (RtD, WriteRegM, RegWriteM) is begin
-	if RtD /= "00000" and (((RtD = WriteRegM) and (RegWriteM = '1')) or ((RtD = "11111") and (LinkM = '1'))) then
-		ForwardBD <= '1';
+	if RtD /= "00000" and (RtD = WriteRegM) then
+		ForwardBD <= RegWriteM;
 	else
 		ForwardBD <= '0';
 	end if;
 end process;
 
 ForwardBE_proc : process (RtE, RegWriteM, RegWriteW, WriteRegM, WriteRegW) is begin
-	if RtE /= "00000" and (((RtE = WriteRegM) and (RegWriteM = '1')) or ((RtE = "11111") and (LinkM = '1'))) then
-		ForwardBE <= "10";
-	elsif RtE /= "00000" and(((RtE = WriteRegW) and (RegWriteW = '1')) or ((RtE = "11111") and (LinkW = '1'))) then
-		ForwardBE <= "01";
+	if RtE /= "00000" then
+		if (RtE = WriteRegM) and (RegWriteM = '1') then
+			ForwardBE <= "10";
+		elsif RtE = WriteRegW then
+			ForwardBE <= '0' & RegWriteW;
+		else
+			ForwardBE <= "00";
+		end if;
 	else
 		ForwardBE <= "00";
 	end if;
 end process;
 
-lwStall_proc : process (RsD, RsE, RtD, RtE, MemtoRegE) is begin
-	if (RsD = RtE or RtD = RtE) and MemtoRegE = '1' then
-		lwStall <= '1';
+lwStall_proc : process (RsD, RtD, RtE, MemtoRegE) is begin
+	if RsD = RtE or RtD = RtE then
+		lwStall <= MemtoRegE;
 	else
 		lwStall <= '0';
 	end if;
