@@ -5,8 +5,8 @@ use work.globals.all;
 
 entity core is
 	Port ( 
-		clk	        : in  std_logic;
-		rst	        : in  std_logic;
+		clk         : in  std_logic;
+		rst         : in  std_logic;
 		Instruction : in  std_logic_vector (31 downto 0);
 		d_in        : in  std_logic_vector (BIT_DEPTH - 1 downto 0);
 		we          : out std_logic;
