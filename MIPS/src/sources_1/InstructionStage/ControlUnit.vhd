@@ -37,10 +37,10 @@ end process;
 
 RegWrite_proc : process (Opcode, Funct) is begin
 	case Opcode is
-		when "101011" | "000001" | "000101" | "000111" | "000110" | "000100" | "000010" | "000011" => RegWrite <= '0';
+		when "101011" | "000001" | "000101" | "000111" | "000110" | "000100" | "000010" => RegWrite <= '0';
 		when "000000" =>
 			case Funct is
-				when "011000" | "011001" | "010001" | "010011" => RegWrite <= '0'; --mult, multu, mthi, mtlo
+				when "011000" | "011001" | "010001" | "010011" | "001000" => RegWrite <= '0'; --mult, multu, mthi, mtlo, jr
 				when others => RegWrite <= '1';
 			end case;
 		when others => RegWrite <= '1';
@@ -48,19 +48,17 @@ RegWrite_proc : process (Opcode, Funct) is begin
 end process;
 	
 MemtoReg_proc : process (Opcode) is begin
-	if Opcode = "100011" then
-		MemtoReg <= '1';
-	else
-		MemtoReg <= '0';
-	end if;
+	case Opcode is
+		when "100011" => MemtoReg <= '1';
+		when others => MemtoReg <= '0';
+	end case;
 end process;
 	
 MemWrite_proc :process (Opcode) is begin
-	if Opcode = "101011" then
-		MemWrite <= '1';
-	else
-		MemWrite <= '0';
-	end if;
+	case Opcode is
+		when "101011" => MemWrite <= '1';
+		when others => MemWrite <= '0';
+	end case;
 end process;
 	
 ALUControl_proc : process (Opcode, Funct) is begin
@@ -71,7 +69,7 @@ ALUControl_proc : process (Opcode, Funct) is begin
 		when "001110" => ALUControl <= "1011";
 		when "000000" =>
 			case Funct is
-				when "100000" | "010000" | "010010" | "010011" | "010001" => ALUControl <= "0100";
+				when "100000" | "010000" | "010010" | "010011" | "010001" | "001000" => ALUControl <= "0100";
 				when "100100" => ALUControl <= "1010";
 				when "011001" | "011000" => ALUControl <= "0110";
 				when "100101" => ALUControl <= "1000";
@@ -94,11 +92,10 @@ ALUSrc_proc : process (Opcode) is begin
 end process;
 	
 RegDst_proc : process (Opcode) is begin
-	if Opcode = "000000" then
-		RegDst <= '1';
-	else
-		RegDst <= '0';
-	end if;
+	case Opcode is
+		when "000000" | "000011" => RegDst <= '1';
+		when others => RegDst <= '0';
+	end case;
 end process;
 
 with Opcode select

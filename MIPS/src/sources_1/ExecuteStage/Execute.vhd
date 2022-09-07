@@ -5,7 +5,6 @@ use work.globals.all;
 
 entity Execute is
 	Port (
-		clk         : in  std_logic;
 		ALUSrc      : in  std_logic;
 		RegDst      : in  std_logic;
 		RegWriteHi  : in  std_logic;
@@ -31,7 +30,6 @@ begin
 
 ALU : entity work.alu4
 	Port map(
-		clk => clk,
 		A   => RegSrcA,
 		B   => ALUop2,
 		OP  => ALUControl,

@@ -5,7 +5,6 @@ use work.globals.all;
 
 entity alu4 is
 	port (
-		clk : in  std_logic;
 		A   : in  std_logic_vector (BIT_DEPTH - 1 downto 0);
 		B   : in  std_logic_vector (BIT_DEPTH - 1 downto 0);
 		OP  : in  std_logic_vector (3 downto 0);

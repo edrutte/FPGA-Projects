@@ -52,8 +52,6 @@ signal MemWriteM : std_logic := '0';
 
 signal LinkD : std_logic := '0';
 signal LinkE : std_logic := '0';
-signal LinkM : std_logic := '0';
-signal LinkW : std_logic := '0';
 
 signal BranchCalcD : std_logic := '0';
 
@@ -97,7 +95,6 @@ signal ALUResultE : std_logic_vector (BIT_DEPTH - 1 downto 0);
 signal ALUResultM : std_logic_vector (BIT_DEPTH - 1 downto 0);
 signal ALUResultW : std_logic_vector (BIT_DEPTH - 1 downto 0);
 
-signal HiWriteDataD : std_logic_vector (BIT_DEPTH - 1 downto 0);
 signal HiWriteDataE : std_logic_vector (BIT_DEPTH - 1 downto 0);
 signal HiWriteDataM : std_logic_vector (BIT_DEPTH - 1 downto 0);
 signal HiWriteDataW : std_logic_vector (BIT_DEPTH - 1 downto 0);
@@ -146,7 +143,6 @@ Decode : entity work.InstructionDecode
 		RegWriteEn   => RegWriteW,
 		RegWriteHi   => RegWriteHiW,
 		RegWriteLo   => RegWriteLoW,
-		LinkWriteEn  => LinkW,
 		ForwardAD    => ForwardAD,
 		ForwardBD    => ForwardBD,
 		RegWrite     => RegWriteD,
@@ -193,8 +189,6 @@ Hazard : entity work.Hazard
 		MemtoRegE => MemtoRegE,
 		MemtoRegM => MemToRegM,
 		BranchD   => BranchCalcD,
-		LinkM     => LinkM,
-		LinkW     => LinkW,
 		WriteRegE => WriteRegE,
 		WriteRegM => WriteRegM,
 		WriteRegW => WriteRegW,
@@ -209,7 +203,6 @@ Hazard : entity work.Hazard
 
 RegSrcA_proc : process (ForwardAE, RD1E, result, ALUResultM) is begin
 	case ForwardAE is
-		when "00"   => RegSrcA <= RD1E;
 		when "01"   => RegSrcA <= result;
 		when "10"   => RegSrcA <= ALUResultM;
 		when others => RegSrcA <= RD1E;
@@ -218,7 +211,6 @@ end process;
 
 RegSrcB_proc : process (ForwardBE, RD2E, result, ALUResultM) is begin
 	case ForwardBE is
-		when "00"   => RegSrcB <= RD2E;
 		when "01"   => RegSrcB <= result;
 		when "10"   => RegSrcB <= ALUResultM;
 		when others => RegSrcB <= RD2E;
@@ -227,7 +219,6 @@ end process;
 
 Execute : entity work.Execute
 	Port map(
-		clk         => clk,
 		ALUControl  => ALUControlE,
 		ALUSrc      => ALUSrcE,
 		RegDst      => RegDstE,
@@ -286,10 +277,8 @@ stageDiv : process (clk) is begin
 		RtE          <= RtD;
 		RdE          <= RdD;
 		LinkE        <= LinkD;
-		LinkM        <= LinkE;
-		LinkW        <= LinkM;
 		ALUControlE  <= ALUControlD;
-		RegWriteM    <= RegWriteE;
+		RegWriteM    <= RegWriteE or LinkE;
 		RegWriteHiM  <= RegWriteHiE;
 		RegWriteHiW  <= RegWriteHiM;
 		RegWriteLoM  <= RegWriteLoE;

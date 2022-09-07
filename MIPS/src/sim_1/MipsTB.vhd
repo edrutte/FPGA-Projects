@@ -54,6 +54,27 @@ constant br_prg : mem_type:= (
 	others => (others => '0')
 );
 
+constant sub_prg : mem_type := (
+
+	x"20", x"10", x"00", x"00", --addi $s0, $zero, 0x0
+	x"0C", x"00", x"00", x"08", --jal 0x8
+	x"20", x"08", x"11", x"11", --addi $t0, $zero, 0x1111
+	x"AE", x"08", x"00", x"00", --sw $t0, 0x0($s0)
+	x"0C", x"00", x"00", x"0C", --jal 0xc
+	x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1
+	x"08", x"00", x"00", x"0F", --j 0xf
+	x"AE", x"10", x"00", x"00", --sw $s0, 0x0($s0)
+	x"AE", x"1F", x"00", x"00", --sw $ra, 0x0($s0)
+	x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1
+	x"03", x"E0", x"00", x"08", --jr $ra
+	x"20", x"08", x"22", x"22", --addi $t0, $zero, 0x2222
+	x"AE", x"1F", x"00", x"00", --sw $ra, 0x0($s0)
+	x"03", x"E0", x"00", x"08", --jr $ra
+	x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1
+
+	others => (others => '0')
+);
+
 constant hilo_prg : mem_type := (
 
 	x"20", x"10", x"00", x"00", --addi $s0, $zero, 0x0
@@ -90,7 +111,7 @@ component seg7 is
 	);
 end component;
 
-constant test_prg : mem_type := br_prg; --Change this to change the test
+constant test_prg : mem_type := sub_prg; --Change this to change the test
 
 begin
 
@@ -253,6 +274,34 @@ hilo_test : if test_prg = hilo_prg generate
 	end process;
 end generate;
 
+sub_test : if test_prg = sub_prg generate
+	test_proc : process is begin
+		wait until clk = '0';
+		rst <= '0';
+		wait until we = '1';
+		assert writeData = 32x"c"
+			report "Expected return address for sub #1 to be " & to_hex_string(32x"c") & " but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"2222"
+			report "Expected sub #1 to return " & to_hex_string(32x"2222") & " but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"18"
+			report "Expected return address for sub #2 to be " & to_hex_string(32x"18") & " but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"3"
+			report "Expected sub #2 to increment s0 to " & to_hex_string(32x"3") & " but got " & to_hex_string(writeData)
+			severity error;
+		wait until clk = '0';
+		wait until clk = '0'; --wait a couple of clocks for data to get to memory
+		assert FALSE
+			report "End of testbench"
+			severity failure;
+	end process;
+end generate;
+	
 sw <= "10010110";
 
 end Behavioral;

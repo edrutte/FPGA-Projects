@@ -16,7 +16,6 @@ entity InstructionDecode is
 		RegWriteEn   : in  std_logic;
 		RegWriteHi   : in  std_logic;
 		RegWriteLo   : in  std_logic;
-		LinkWriteEn  : in  std_logic;
 		ForwardAD    : in  std_logic;
 		ForwardBD    : in  std_logic;
 		RegWrite     : out std_logic;
@@ -42,8 +41,6 @@ end InstructionDecode;
 
 architecture SomeRandomName of InstructionDecode is
 
-signal RegBrCalc   : std_logic;
-signal RegImmBr    : std_logic;
 signal Opcode      : std_logic_vector (5 downto 0);
 signal CmpIn1      : std_logic_vector (BIT_DEPTH - 1 downto 0);
 signal CmpIn2      : std_logic_vector (BIT_DEPTH - 1 downto 0);
@@ -81,7 +78,7 @@ RegFile : entity work.RegisterFile
 	Port map (
 		clk_n => clk,
 		Addr1 => RsDest,
-		Addr2 => Instruction (20 downto 16),
+		Addr2 => RtDest,
 		Addr3 => RegWriteAddr,
 		wd    => RegWriteData,
 		wd_hi => HiWriteData,
@@ -90,7 +87,6 @@ RegFile : entity work.RegisterFile
 		we    => RegWriteEn,
 		we_hi => RegWriteHi,
 		we_lo => RegWriteLo,
-		Link  => LinkWriteEn,
 		RD1   => RD1,
 		RD2   => RD2
 	);
@@ -116,34 +112,46 @@ OpA_proc : process(Opcode, Funct, RD1, sa, PCPlus4) is begin
 	end case;
 end process;
 
-with Opcode select
-	PCSrc <=
-		eq when "000100",
-		not eq when "000101",
-		gt when "000111",
-		not gt when "000110",
-		RegImmBr when "000001",
-		'1' when "000010" | "000011",
-		'0' when others;
+PCSrc_proc : process(Opcode, Funct, eq, gt, z, RtDest) is begin
+	case Opcode is
+		when "000100" => PCSrc <= eq;
+		when "000101" => PCSrc <= not eq;
+		when "000111" => PCSrc <= gt;
+		when "000110" => PCSrc <= not gt;
+		when "000001" =>
+			case RtDest is
+				when "00000" => PCSrc <= gt nor z;
+				when "00001" => PCSrc <= gt or z;
+				when others => PCSrc <= '0';
+			end case;
+		when "000000" =>
+			case Funct is
+				when "001000" => PCSrc <= '1';
+				when others => PCSrc <= '0';
+			end case;
+		when "000010" | "000011" => PCSrc <= '1';
+		when others => PCSrc <= '0';
+	end case;
+end process;
 
-with RtDest select
-	RegImmBr <=
-		gt nor z when "00000",
-		gt or z when "00001",
-		'0' when others;
-
-
-with Opcode select
-	PCBranch <=
-		Instruction (25 downto 0) & "00" when "000010" | "000011",
-		std_logic_vector(signed(unsigned(PCPlus4)) + signed(ImmOut(15 downto 0) & "00")) when others;
+PCBranch_proc : process(Opcode, Funct, Instruction, PCPlus4, ImmOut, RD1) is begin
+	case Opcode is
+		when "000010" | "000011" => PCBranch <= Instruction (25 downto 0) & "00";
+		when "000000" =>
+			case Funct is
+				when "001000" => PCBranch <= RD1 (27 downto 0);
+				when others => PCBranch <= std_logic_vector(signed(unsigned(PCPlus4)) + signed(ImmOut(15 downto 0) & "00"));
+			end case;
+		when others => PCBranch <= std_logic_vector(signed(unsigned(PCPlus4)) + signed(ImmOut(15 downto 0) & "00"));
+	end case;
+end process;
 
 CmpIn1 <= CmpData when ForwardAD = '1' else RD1;
 CmpIn2 <= CmpData when ForwardBD = '1' else RD2;
 
 Opcode <= Instruction (31 downto 26);
 RsDest <= Instruction (25 downto 21);
-RtDest <= Instruction (20 downto 16) when Link = '0' else "11111";
+RtDest <= Instruction (20 downto 16);
 RdDest <= Instruction (15 downto 11) when Link = '0' else "11111";
 sa     <= Instruction (10 downto 6);
 Funct  <= Instruction (5 downto 0);
