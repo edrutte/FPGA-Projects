@@ -21,7 +21,7 @@ begin
 
 aeqb <= '1' when a = b else '0';
 
-aeqz_tmp <= '1' when to_integer(signed(a)) = 0 else '0';
+aeqz_tmp <= '1' when unsigned(a) = to_unsigned(0, BIT_DEPTH) else '0';
 
 aneg <= a(BIT_DEPTH - 1);
 
