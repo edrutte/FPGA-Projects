@@ -4,6 +4,7 @@
 /**/*.jou
 /**/*.str
 /**/*.log
+/**/*.xpr
 /**/*.funcunit
 /SHA256/Vitis/*/*_data.json
 /SHA256/Vitis/Debug/
