@@ -9,7 +9,7 @@ proc setupFiles {} {
     add_files "src/sources_1/"
     add_files -fileset constrs_1 "src/constrs_1/mercury2_baseboard.xdc"
     add_files -fileset sim_1 "src/sim_1/MipsTB.vhd"
-    set_property FILE_TYPE {VHDL 2008} [get_files {Multiplier.vhd Adder.vhd DataMem.vhd InstructionDecode.vhd MipsTB.vhd}]
+    set_property FILE_TYPE {VHDL 2008} [get_files {core.vhd Multiplier.vhd Adder.vhd DataMem.vhd InstructionDecode.vhd MipsTB.vhd}]
 }
 
 proc genMMCM {} {
