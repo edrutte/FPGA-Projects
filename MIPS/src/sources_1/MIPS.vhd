@@ -10,9 +10,9 @@ entity MIPS is
 	Port ( 
 		clk	    : in  std_logic;
 		rst	    : in  std_logic;
-		sw	    : in  std_logic_vector ( NUM_SWITCHES - 1 downto 0 );
-		an_7seg : out std_logic_vector ( 3 downto 0 ) := "1111";
-		ag_seg  : out std_logic_vector ( 6 downto 0 ) := "1111111";
+		sw	    : in  std_logic_vector (NUM_SWITCHES - 1 downto 0);
+		an_7seg : out std_logic_vector (3 downto 0) := "1111";
+		ag_seg  : out std_logic_vector (6 downto 0) := "1111111";
 		seg_dot : out std_logic := '1'
 	);
 end MIPS;
@@ -31,8 +31,8 @@ signal displayed_number : std_logic_vector(15 downto 0);
 
 signal clk_out1 : std_logic := '0';
 
-signal swMeta   : std_logic_vector ( NUM_SWITCHES - 1 downto 0 ) := (others => '0');
-signal swNoMeta : std_logic_vector ( NUM_SWITCHES - 1 downto 0 ) := (others => '0');
+signal swMeta   : std_logic_vector (NUM_SWITCHES - 1 downto 0) := (others => '0');
+signal swNoMeta : std_logic_vector (NUM_SWITCHES - 1 downto 0) := (others => '0');
 
 signal rst_debounce : std_logic := '0';
 
@@ -49,9 +49,9 @@ end component;
 component seg7 is
 	Port(
 		Clock_50MHz      : in  std_logic;
-		displayed_number : in  std_logic_vector ( 15 downto 0 );
-		Anode_Activate   : out std_logic_vector ( 3 downto 0 );
-		LED_out          : out std_logic_vector ( 6 downto 0 )
+		displayed_number : in  std_logic_vector (15 downto 0);
+		Anode_Activate   : out std_logic_vector (3 downto 0);
+		LED_out          : out std_logic_vector (6 downto 0)
 	);
 end component;
 
@@ -80,7 +80,7 @@ real_synth : if not SIM generate
 
 	Debouncer : entity work.debounce
 		Port map(
-			clk          => clk,
+			clk          => clk_out1,
 			rst          => '0',
 			button_in    => rstNoMeta,
 			button_out_p => rst_debounce
@@ -123,7 +123,7 @@ memD : entity work.DataMem
 
 sev_seg : seg7
 	Port map(
-		clock_50MHz      => clk,
+		clock_50MHz      => clk_out1,
 		displayed_number => displayed_number,
 		Anode_Activate   => an_7seg,
 		LED_out          => ag_seg
