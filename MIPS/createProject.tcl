@@ -37,6 +37,7 @@ proc genMMCM {} {
 proc createRuns {} {
     create_run -name synth_1 -part xc7a100tftg256-1 -flow {Vivado Synthesis 2022} -strategy "Vivado Synthesis Defaults" -report_strategy {No Reports} -constrset constrs_1
     create_run -name impl_1 -part xc7a100tftg256-1 -flow {Vivado Implementation 2022} -strategy "Performance_ExtraTimingOpt" -report_strategy {No Reports} -constrset constrs_1 -parent_run synth_1
+    set_property -name "steps.post_route_phys_opt_design.is_enabled" -value "1" -objects [get_runs impl_1]
 }
 
 init
