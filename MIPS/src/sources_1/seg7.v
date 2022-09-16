@@ -1,7 +1,7 @@
 // fpga4student.com: FPGA projects, Verilog projects, VHDL projects
 // FPGA tutorial: seven-segment LED display controller on Basys  3 FPGA
 module seg7(
-    input clock_50Mhz, // 50 Mhz clock source on Mercury 2 FPGA
+    input clock_50MHz, // 50 Mhz clock source on Mercury 2 FPGA
     input [15:0] displayed_number, // counting number to be displayed
     output reg [3:0] Anode_Activate, // anode signals of the 7-segment LED display
     output reg [6:0] LED_out// cathode patterns of the 7-segment LED display
@@ -16,7 +16,7 @@ module seg7(
               // activates    LED1    LED2   LED3   LED4
              // and repeat
     
-    always @(posedge clock_50Mhz)
+    always @(posedge clock_50MHz)
     begin 
         refresh_counter <= refresh_counter + 1;
     end 
