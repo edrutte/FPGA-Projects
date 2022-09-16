@@ -11,13 +11,12 @@ entity InstructionDecode is
 		RegWriteAddr : in  std_logic_vector (LOG_PORT_DEPTH - 1 downto 0);
 		RegWriteData : in  std_logic_vector (BIT_DEPTH - 1 downto 0);
 		HiWriteData  : in  std_logic_vector (BIT_DEPTH - 1 downto 0);
-		CmpData      : in  std_logic_vector (BIT_DEPTH - 1 downto 0);
+		CmpData1     : in  std_logic_vector (BIT_DEPTH - 1 downto 0);
+		CmpData2     : in  std_logic_vector (BIT_DEPTH - 1 downto 0);
 		PCPlus4      : in  std_logic_vector (27 downto 0);
 		RegWriteEn   : in  std_logic;
 		RegWriteHi   : in  std_logic;
 		RegWriteLo   : in  std_logic;
-		ForwardAD    : in  std_logic;
-		ForwardBD    : in  std_logic;
 		RegWrite     : out std_logic;
 		MemtoReg     : out std_logic;
 		MemWrite     : out std_logic;
@@ -42,8 +41,6 @@ end InstructionDecode;
 architecture SomeRandomName of InstructionDecode is
 
 signal Opcode      : std_logic_vector (5 downto 0);
-signal CmpIn1      : std_logic_vector (BIT_DEPTH - 1 downto 0);
-signal CmpIn2      : std_logic_vector (BIT_DEPTH - 1 downto 0);
 signal Funct       : std_logic_vector (5 downto 0);
 signal rd_hi       : std_logic;
 signal rd_lo       : std_logic;
@@ -93,8 +90,8 @@ RegFile : entity work.RegisterFile
 
 compare : entity work.Comparator
 	port map (
-		a     => CmpIn1,
-		b     => CmpIn2,
+		a     => CmpData1,
+		b     => CmpData2,
 		aeqb  => eq,
 		agtz  => gt,
 		aeqz  => z
@@ -145,9 +142,6 @@ PCBranch_proc : process(Opcode, Funct, Instruction, PCPlus4, ImmOut, RD1) is beg
 		when others => PCBranch <= std_logic_vector(signed(unsigned(PCPlus4)) + signed(ImmOut(15 downto 0) & "00"));
 	end case;
 end process;
-
-CmpIn1 <= CmpData when ForwardAD = '1' else RD1;
-CmpIn2 <= CmpData when ForwardBD = '1' else RD2;
 
 Opcode <= Instruction (31 downto 26);
 RsDest <= Instruction (25 downto 21);

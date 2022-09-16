@@ -34,6 +34,12 @@ proc genMMCM {} {
     } $clk_wiz_0
 }
 
+proc createRuns {} {
+    create_run -name synth_1 -part xc7a100tftg256-1 -flow {Vivado Synthesis 2022} -strategy "Vivado Synthesis Defaults" -report_strategy {No Reports} -constrset constrs_1
+    create_run -name impl_1 -part xc7a100tftg256-1 -flow {Vivado Implementation 2022} -strategy "Performance_ExtraTimingOpt" -report_strategy {No Reports} -constrset constrs_1 -parent_run synth_1
+}
+
 init
 setupFiles
 genMMCM
+createRuns

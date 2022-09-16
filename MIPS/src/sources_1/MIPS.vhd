@@ -2,15 +2,17 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 use work.globals.all;
+use work.mem_package.all;
 
 entity MIPS is
 	Generic (
-		SIM : boolean := FALSE
+		SIM : boolean := FALSE;
+		PRG : mem_type := fib_prg
 	);
 	Port ( 
-		clk	    : in  std_logic;
-		rst	    : in  std_logic;
-		sw	    : in  std_logic_vector (NUM_SWITCHES - 1 downto 0);
+		clk	: in  std_logic;
+		rst	: in  std_logic;
+		sw	: in  std_logic_vector (NUM_SWITCHES - 1 downto 0);
 		an_7seg : out std_logic_vector (3 downto 0) := "1111";
 		ag_seg  : out std_logic_vector (6 downto 0) := "1111111";
 		seg_dot : out std_logic := '1'
@@ -48,7 +50,7 @@ end component;
 
 component seg7 is
 	Port(
-		Clock_50MHz      : in  std_logic;
+		clock_50MHz      : in  std_logic;
 		displayed_number : in  std_logic_vector (15 downto 0);
 		Anode_Activate   : out std_logic_vector (3 downto 0);
 		LED_out          : out std_logic_vector (6 downto 0)
@@ -85,6 +87,14 @@ real_synth : if not SIM generate
 			button_in    => rstNoMeta,
 			button_out_p => rst_debounce
 		);
+
+        sev_seg : seg7
+		Port map(
+			clock_50MHz      => clk_out1,
+			displayed_number => displayed_number,
+			Anode_Activate   => an_7seg,
+			LED_out          => ag_seg
+		);
 end generate;
 
 fast_sim : if SIM generate
@@ -93,6 +103,9 @@ fast_sim : if SIM generate
 end generate;
 
 memI : entity work.InstructionMem
+	Generic map(
+		PRG => PRG
+	)
 	Port map(
 		addr => PC,
 		d_out => Instruction
@@ -119,14 +132,6 @@ memD : entity work.DataMem
 		switches  => swNoMeta,
 		d_out     => readData,
 		seven_seg => displayed_number
-	);
-
-sev_seg : seg7
-	Port map(
-		clock_50MHz      => clk_out1,
-		displayed_number => displayed_number,
-		Anode_Activate   => an_7seg,
-		LED_out          => ag_seg
 	);
 
 unmeta_proc : process (clk_out1) is begin

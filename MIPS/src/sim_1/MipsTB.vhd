@@ -13,15 +13,12 @@ signal Instruction      : std_logic_vector (31 downto 0) := (others => '0');
 signal PC               : std_logic_vector (27 downto 0) := (others => '0');
 signal displayed_number : std_logic_vector (15 downto 0);
 signal sw               : std_logic_vector (7 downto 0);
-signal an_7seg          : std_logic_vector (3 downto 0);
-signal ag_seg           : std_logic_vector (6 downto 0);
 signal dataAddr         : std_logic_vector (DATA_ADDR_BITS - 1 downto 0);
 signal readData         : std_logic_vector (BIT_DEPTH - 1 downto 0);
 signal writeData        : std_logic_vector (BIT_DEPTH - 1 downto 0);
 signal we               : std_logic := '0';
 signal clk              : std_logic := '0';
 signal rst              : std_logic := '1';
-signal seg_dot          : std_logic;
 
 constant br_prg : mem_type:= (
 
@@ -102,15 +99,6 @@ constant hilo_prg : mem_type := (
 	others => (others => '0')
 );
 
-component seg7 is
-	Port(
-		Clock_50MHz      : in  std_logic;
-		displayed_number : in  std_logic_vector (15 downto 0);
-		Anode_Activate   : out std_logic_vector (3 downto 0);
-		LED_out          : out std_logic_vector (6 downto 0)
-	);
-end component;
-
 constant test_prg : mem_type := sub_prg; --Change this to change the test
 
 begin
@@ -143,14 +131,6 @@ memD : entity work.DataMem
 		switches  => sw,
 		d_out     => readData,
 		seven_seg => displayed_number
-	);
-
-sev_seg : seg7
-	Port map(
-		clock_50MHz      => clk,
-		displayed_number => displayed_number,
-		Anode_Activate   => an_7seg,
-		LED_out          => ag_seg
 	);
 	
 clk <= not clk after 5 ns;
