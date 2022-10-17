@@ -5,6 +5,7 @@ use ieee.numeric_std.all;
 entity UART_Rx is
 	Port (
 		clk      : in  std_logic;
+		baud_en  : in  std_logic;
 		rx_in    : in  std_logic;
 		rx_ready : out std_logic;
 		rx_data  : out std_logic_vector (7 downto 0)
@@ -24,13 +25,13 @@ signal bit_count : unsigned (3 downto 0) := (others => '0');
 begin
 
 sync_proc : process (clk) is begin
-	if rising_edge(clk) then
+	if rising_edge(clk) and baud_en = '1' then
 		state <= next_state;
 	end if;
 end process;
 
 bit_count_proc : process (clk) is begin
-	if rising_edge(clk) then
+	if rising_edge(clk) and baud_en = '1'then
 		if next_state = recieve then
 			bit_count <= bit_count + 1;
 		else
@@ -48,7 +49,7 @@ rx_data_proc : process (next_state, rx_data_sr, rx_data_buf) is begin
 end process;
 
 rx_data_buf_proc : process (clk) is begin
-	if rising_edge(clk) then
+	if rising_edge(clk) and baud_en = '1' then
 		if next_state = end_bit then
 			rx_data_buf <= rx_data_sr;
 		else
@@ -58,13 +59,13 @@ rx_data_buf_proc : process (clk) is begin
 end process;
 
 rx_data_sr_proc : process (clk) is begin
-	if rising_edge(clk) then
+	if rising_edge(clk) and baud_en = '1' then
 		if next_state = start_bit then
 			rx_data_sr <= "00000000";
 		elsif next_state = Recieve then
 			rx_data_sr <= rx_in & rx_data_sr (7 downto 1);
 		else
-			rx_data_sr <= rx_data;
+			rx_data_sr <= rx_data_sr;
 		end if;
 	end if;
 end process;

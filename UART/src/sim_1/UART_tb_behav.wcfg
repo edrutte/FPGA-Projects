@@ -3,61 +3,68 @@
    <wave_state>
    </wave_state>
    <db_ref_list>
-      <db_ref path="UART_tb_time_synth.wdb" id="1">
+      <db_ref path="UART_tb_behav.wdb" id="1">
          <top_modules>
             <top_module name="UART_tb" />
-            <top_module name="glbl" />
          </top_modules>
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="0fs"></ZoomStartTime>
-      <ZoomEndTime time="1935820001fs"></ZoomEndTime>
-      <Cursor1Time time="1935820000fs"></Cursor1Time>
+      <ZoomStartTime time="0.000000 us"></ZoomStartTime>
+      <ZoomEndTime time="956.990001 us"></ZoomEndTime>
+      <Cursor1Time time="8.690000 us"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="94"></NameColumnWidth>
-      <ValueColumnWidth column_width="72"></ValueColumnWidth>
+      <ValueColumnWidth column_width="68"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="10" />
-   <wvobject fp_name="/UART_tb/baud_clk" type="logic">
-      <obj_property name="ElementShortName">baud_clk</obj_property>
-      <obj_property name="ObjectShortName">baud_clk</obj_property>
-   </wvobject>
-   <wvobject fp_name="/UART_tb/rx_in" type="logic">
+   <WVObjectSize size="12" />
+   <wvobject type="logic" fp_name="/UART_tb/rx_in">
       <obj_property name="ElementShortName">rx_in</obj_property>
       <obj_property name="ObjectShortName">rx_in</obj_property>
    </wvobject>
-   <wvobject fp_name="/UART_tb/tx_out" type="logic">
+   <wvobject type="logic" fp_name="/UART_tb/tx_out">
       <obj_property name="ElementShortName">tx_out</obj_property>
       <obj_property name="ObjectShortName">tx_out</obj_property>
    </wvobject>
-   <wvobject fp_name="/UART_tb/tx_send" type="logic">
+   <wvobject type="logic" fp_name="/UART_tb/tx_send">
       <obj_property name="ElementShortName">tx_send</obj_property>
       <obj_property name="ObjectShortName">tx_send</obj_property>
    </wvobject>
-   <wvobject fp_name="/UART_tb/tx_ready" type="logic">
+   <wvobject type="logic" fp_name="/UART_tb/tx_ready">
       <obj_property name="ElementShortName">tx_ready</obj_property>
       <obj_property name="ObjectShortName">tx_ready</obj_property>
    </wvobject>
-   <wvobject fp_name="/UART_tb/rx_ready" type="logic">
+   <wvobject type="logic" fp_name="/UART_tb/rx_ready">
       <obj_property name="ElementShortName">rx_ready</obj_property>
       <obj_property name="ObjectShortName">rx_ready</obj_property>
    </wvobject>
-   <wvobject fp_name="/UART_tb/tx_data" type="array">
+   <wvobject type="array" fp_name="/UART_tb/tx_data">
       <obj_property name="ElementShortName">tx_data[7:0]</obj_property>
       <obj_property name="ObjectShortName">tx_data[7:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/UART_tb/rx_data" type="array">
+   <wvobject type="array" fp_name="/UART_tb/rx_data">
       <obj_property name="ElementShortName">rx_data[7:0]</obj_property>
       <obj_property name="ObjectShortName">rx_data[7:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/UART_tb/BAUD_RATE" type="other">
+   <wvobject type="other" fp_name="/UART_tb/BAUD_RATE">
       <obj_property name="ElementShortName">BAUD_RATE</obj_property>
       <obj_property name="ObjectShortName">BAUD_RATE</obj_property>
    </wvobject>
-   <wvobject fp_name="/UART_tb/test_vector_array" type="array">
+   <wvobject type="array" fp_name="/UART_tb/test_vector_array">
       <obj_property name="ElementShortName">test_vector_array[0:9][7:0]</obj_property>
       <obj_property name="ObjectShortName">test_vector_array[0:9][7:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/UART_tb/baud_en">
+      <obj_property name="ElementShortName">baud_en</obj_property>
+      <obj_property name="ObjectShortName">baud_en</obj_property>
+   </wvobject>
+   <wvobject type="other" fp_name="/UART_tb/UART/tx/state">
+      <obj_property name="ElementShortName">state</obj_property>
+      <obj_property name="ObjectShortName">state</obj_property>
+   </wvobject>
+   <wvobject type="other" fp_name="/UART_tb/UART/tx/next_state">
+      <obj_property name="ElementShortName">next_state</obj_property>
+      <obj_property name="ObjectShortName">next_state</obj_property>
    </wvobject>
 </wave_config>

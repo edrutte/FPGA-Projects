@@ -11,7 +11,7 @@ entity UART_Mercury is
   		an_7seg : out std_logic_vector (3 downto 0);
         ag_seg  : out std_logic_vector (6 downto 0);
         --seg_dot : out std_logic;
-        tx_out  : out std_logic;
+        tx_out  : out std_logic
   		);
 end UART_Mercury;
 

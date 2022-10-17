@@ -5,6 +5,7 @@ use ieee.numeric_std.all;
 entity UART_Tx is
 	Port (
 		clk     : in  std_logic;
+		baud_en : in  std_logic;
 		go      : in  std_logic;
 		tx_data : in  std_logic_vector (7 downto 0);
 		busy    : out std_logic;
@@ -14,7 +15,7 @@ end UART_Tx;
 
 architecture SomeRandomName of UART_Tx is
 
-type state_type is (Hold, Init, Send, DeInit);
+type state_type is (Hold, Init, Start, Send, DeInit);
 signal state, next_state : state_type := Hold;
 
 signal bit_count : unsigned (3 downto 0) := (others => '0');
@@ -24,7 +25,7 @@ signal tx_data_buf : std_logic_vector (7 downto 0) := (others => '0');
 begin
 
 sync_proc : process (clk) is begin
-	if rising_edge(clk) then
+	if rising_edge(clk) and (next_state = Init or baud_en = '1') then
 		state <= next_state;
 	end if;
 end process;
@@ -37,7 +38,8 @@ next_state_proc : process (state, bit_count, go) is begin
 			else
 				next_state <= Hold;
 			end if;
-		when Init => next_state <= Send;
+		when Init => next_state <= Start;
+		when Start => next_state <= Send;
 		when Send =>
 			if bit_count = "0111" then
 				next_state <= DeInit;
@@ -49,7 +51,7 @@ next_state_proc : process (state, bit_count, go) is begin
 end process;
 
 bit_count_proc : process (clk) is begin
-	if rising_edge(clk) then
+	if rising_edge(clk) and baud_en = '1' then
 		if state = Send then
 			bit_count <= bit_count + 1;
 		else
@@ -59,10 +61,10 @@ bit_count_proc : process (clk) is begin
 end process;
 
 tx_data_buf_proc : process (clk) is begin
-	if rising_edge(clk) then
+	if rising_edge(clk) and baud_en = '1' then
 		if state = Init then
 			tx_data_buf <= tx_data;
-		else
+		elsif state /= Start then
 			tx_data_buf <= '0' & tx_data_buf (7 downto 1);
 		end if;
 	end if;
@@ -77,7 +79,7 @@ busy_proc : process (state) is begin
 end process;
 
 tx_out_proc : process (state, tx_data_buf) is begin
-	if state = Init then
+	if state = Start then
 		tx_out <= '0';
 	elsif state = Send then
 		tx_out <= tx_data_buf(0);

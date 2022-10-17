@@ -21,7 +21,7 @@ end UART_top;
 
 architecture SomeRandomName of UART_top is
 
-signal baud_clk, tx_busy : std_logic := '0';
+signal baud_en, tx_busy : std_logic := '0';
 
 constant BAUD_DIV : unsigned (15 downto 0) := to_unsigned((CLK_IN_MHZ * 1000000) / BAUD_RATE, 16); --large enough for baud down to 9600
 
@@ -31,10 +31,11 @@ baud_clk_proc : process (clk) is
 	variable div : unsigned (15 downto 0) := (others => '0');
 begin
 	if rising_edge(clk) then
-		if div = BAUD_DIV / 2 then
+		if div = BAUD_DIV - 1 then --will be detected on next clock cycle
 			div := (others => '0');
-			baud_clk <= not baud_clk;
+			baud_en <= '1';
 		else
+			baud_en <= '0';
 			div := div + 1;
 		end if;
 	end if;
@@ -42,7 +43,8 @@ end process;
 
 rx : entity work.UART_Rx
 	port map(
-		clk => baud_clk,
+		clk => clk,
+		baud_en => baud_en,
 		rx_in => rx_in,
 		rx_ready => rx_ready,
 		rx_data => rx_data
@@ -50,7 +52,8 @@ rx : entity work.UART_Rx
 
 tx : entity work.UART_Tx
 	port map(
-		clk => baud_clk,
+		clk => clk,
+		baud_en => baud_en,
 		go => tx_send,
 		tx_data => tx_data,
 		busy => tx_busy,

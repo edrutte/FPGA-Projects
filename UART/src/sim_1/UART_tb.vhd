@@ -1,35 +1,6 @@
-----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
--- Create Date: 04/30/2021 11:39:36 AM
--- Design Name: 
--- Module Name: UART_tb - tb
--- Project Name: 
--- Target Devices: 
--- Tool Versions: 
--- Description: 
--- 
--- Dependencies: 
--- 
--- Revision:
--- Revision 0.01 - File Created
--- Additional Comments:
--- 
-----------------------------------------------------------------------------------
-
-
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
-
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
-use IEEE.NUMERIC_STD.ALL;
-
--- Uncomment the following library declaration if instantiating
--- any Xilinx leaf cells in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
 entity UART_tb is
 --  Port ( );
@@ -37,7 +8,7 @@ end UART_tb;
 
 architecture tb of UART_tb is
 
-signal clk, baud_clk, rx_in, tx_out, tx_send, tx_ready, rx_ready : std_logic := '0';
+signal clk, baud_en, rx_in, tx_out, tx_send, tx_ready, rx_ready : std_logic := '0';
 signal tx_data, rx_data : std_logic_vector (7 downto 0);
 
 constant CLK_IN : Integer := 50000000;
@@ -76,7 +47,7 @@ UART : entity work.UART_top
 			);
 
 clk_proc : process is begin
-	wait for 20 ns;
+	wait for 10 ns;
 	clk <= not clk;
 end process;
 
@@ -84,74 +55,62 @@ baud_clk_proc : process (clk) is
 variable div : unsigned (15 downto 0) := (others => '0');
 begin
 	if rising_edge(clk) then
-		if div = BAUD_DIV / 2 then
+		if div = BAUD_DIV then
 			div := (others => '0');
-			baud_clk <= not baud_clk;
+			baud_en <= '1';
 		else
+			baud_en <= '0';
 			div := div + 1;
 		end if;
 	end if;
 end process;
 
-stim_proc : process is begin
-	
-	for i in 0 to num_tests - 1 loop
-		wait until baud_clk = '0';
-		tx_data <= test_vector_array(i);
-		tx_send <= '1';
-		wait until baud_clk = '0';
-		tx_send <= '0';
-		--wait until baud_clk = '0';
-		wait until tx_ready = '1';
-	end loop;
-	
-end process;
-
 assert_proc : process is begin
 	for i in 0 to num_tests - 1 loop
-		wait until baud_clk = '0';
-		if i = 0 then
-			wait until baud_clk = '0';
-		end if;
+		wait until clk = '0';
+		tx_data <= test_vector_array(i);
+		tx_send <= '1';
+		wait until baud_en = '1';
+		tx_send <= '0';
 		assert tx_out = '0'
 			report "Failed to find start bit"
 			severity error;
 		assert tx_ready = '0'
 			report "tx shouldn't be ready"
 			severity error;
-		wait until baud_clk = '0';
+		wait until baud_en = '1';
 		assert tx_out = test_vector_array(i)(0)
 			report "Failed bit 1"
 			severity error;
-		wait until baud_clk = '0';
+		wait until baud_en = '1';
 		assert tx_out = test_vector_array(i)(1)
 			report "Failed bit 2"
 			severity error;
-		wait until baud_clk = '0';
+		wait until baud_en = '1';
 		assert tx_out = test_vector_array(i)(2)
 			report "Failed bit 3"
 			severity error;
-		wait until baud_clk = '0';
+		wait until baud_en = '1';
 		assert tx_out = test_vector_array(i)(3)
 			report "Failed bit 4"
 			severity error;
-		wait until baud_clk = '0';
+		wait until baud_en = '1';
 		assert tx_out = test_vector_array(i)(4)
 			report "Failed bit 5"
 			severity error;
-		wait until baud_clk = '0';
+		wait until baud_en = '1';
 		assert tx_out = test_vector_array(i)(5)
 			report "Failed bit 6"
 			severity error;
-		wait until baud_clk = '0';
+		wait until baud_en = '1';
 		assert tx_out = test_vector_array(i)(6)
 			report "Failed bit 7"
 			severity error;
-		wait until baud_clk = '0';
+		wait until baud_en = '1';
 		assert tx_out = test_vector_array(i)(7)
 			report "Failed bit 8"
 			severity error;
-		wait until baud_clk = '0';
+		wait until baud_en = '1';
 		assert tx_out = '1'
 			report "Failed to find stop bit"
 			severity error;
@@ -161,7 +120,7 @@ assert_proc : process is begin
 		assert rx_data = test_vector_array(i)
 			report "rx_error"
 			severity error;
-		wait until baud_clk = '0';
+		wait until baud_en = '1';
 		assert rx_data = test_vector_array(i)
 			report "rx should not change"
 			severity error;
@@ -171,7 +130,7 @@ assert_proc : process is begin
 		assert tx_ready = '1'
 			report "tx should be ready"      --tx ready not until after stop bit fully sent because thats when new data can be sent
 			severity error;
-		--wait until baud_clk = '0';
+		--wait until baud_en = '1';
 	end loop;
 	assert false
 		report "end"
