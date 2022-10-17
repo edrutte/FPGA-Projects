@@ -60,7 +60,7 @@ begin
 
 	mult_comp: entity work.Multiplier
 		generic map (USE_STRUCTURAL_ARCH => false)
-		port map (A => A, B => B, Lo => lo_result, Hi => hi_result);
+		port map (A => A, B => B, OP => OP (0), Lo => lo_result, Hi => hi_result);
 		-- Use OP to control which operation to show/perform
 
 	with OP select Y <= 
@@ -68,13 +68,13 @@ begin
 		 or_result  when "1000",
 		 add_result when "0100" | "0101",
 		 and_result when "1010",
-		 lo_result  when "0110",
+		 lo_result  when "0110" | "0111",
 		 xor_result when "1011",
 		 sll_result when "1100",
 		 srl_result when "1101",
 		 sra_result when "1110",
 		 x"00000000" when others;
 
-	Hi <= hi_result when OP = "0110" else (others => '0');
+	Hi <= hi_result when OP = "0110" or OP = "0111" else (others => '0');
 
 end structural;
