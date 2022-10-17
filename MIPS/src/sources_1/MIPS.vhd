@@ -43,8 +43,8 @@ signal rstNoMeta : std_logic := '0';
 
 component clk_wiz_0
 	port(
-		clkIn    : in  std_logic;
-		clk_out1 : out std_logic
+		clkIn : in  std_logic;
+		clk   : out std_logic
 	);
 end component;
 
@@ -76,8 +76,8 @@ begin
 real_synth : if not SIM generate
 	clk_div : clk_wiz_0
 		Port map(
-			clk_out1 => clk_out1,
-			clkIn    => clk
+			clkIn => clk,
+			clk   => clk_out1
 		);
 
 	Debouncer : entity work.debounce

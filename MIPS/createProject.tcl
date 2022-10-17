@@ -9,7 +9,7 @@ proc setupFiles {} {
     add_files "src/sources_1/"
     add_files -fileset constrs_1 "src/constrs_1/mercury2_baseboard.xdc"
     add_files -fileset sim_1 "src/sim_1/MipsTB.vhd"
-    set_property FILE_TYPE {VHDL 2008} [get_files {core.vhd Multiplier.vhd Adder.vhd DataMem.vhd InstructionDecode.vhd MipsTB.vhd}]
+    set_property FILE_TYPE {VHDL 2008} [get_files {core.vhd InstructionDecode.vhd MipsTB.vhd}]
 }
 
 proc genMMCM {} {
@@ -19,6 +19,7 @@ proc genMMCM {} {
 	CONFIG.CLKIN1_JITTER_PS {200.0}
 	CONFIG.PRIMARY_PORT {clkin}
 	CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {100}
+	CONFIG.CLK_OUT1_PORT {clk}
 	CONFIG.USE_LOCKED {false}
 	CONFIG.USE_RESET {false}
 	CONFIG.MMCM_CLKFBOUT_MULT_F {20.000}

@@ -1,17 +1,16 @@
 library ieee;
 use ieee.std_logic_1164.all;
-use work.globals.all;
-
 use ieee.numeric_std.all;
+use work.globals.all;
 
 entity DataMem is
 	Port ( 
 		clk, w_en : in  std_logic;
-		addr      : in  std_logic_vector ( DATA_ADDR_BITS - 1 downto 0 );
-		d_in      : in  std_logic_vector ( BIT_DEPTH - 1 downto 0 );
-		switches  : in  std_logic_vector ( NUM_SWITCHES - 1 downto 0 );
-		d_out     : out std_logic_vector ( BIT_DEPTH - 1 downto 0 );
-		seven_seg : out std_logic_vector ( 15 downto 0 ) := (others => '0')
+		addr      : in  std_logic_vector (DATA_ADDR_BITS - 1 downto 0);
+		d_in      : in  std_logic_vector (BIT_DEPTH - 1 downto 0);
+		switches  : in  std_logic_vector (NUM_SWITCHES - 1 downto 0);
+		d_out     : out std_logic_vector (BIT_DEPTH - 1 downto 0);
+		seven_seg : out std_logic_vector (15 downto 0) := (others => '0')
 	);
 end DataMem;
 
@@ -25,10 +24,9 @@ begin
 seven_seg_proc : process (clk) is begin
 	if rising_edge(clk) then
 		if w_en = '1' then
-			case addr is
-				when std_logic_vector(to_unsigned(1023, DATA_ADDR_BITS)) => seven_seg <= d_in (15 downto 0);
-				when others => seven_seg <= seven_seg;
-			end case;
+			if addr = std_logic_vector(to_unsigned(1023, DATA_ADDR_BITS)) then
+				seven_seg <= d_in (15 downto 0);
+			end if;
 		end if;
 	end if;
 end process;

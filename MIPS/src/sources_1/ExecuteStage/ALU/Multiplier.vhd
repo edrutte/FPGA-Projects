@@ -11,6 +11,7 @@ entity Multiplier is
 	Port ( 
 		A       : in  std_logic_vector(BIT_DEPTH - 1 downto 0);
 		B       : in  std_logic_vector(BIT_DEPTH - 1 downto 0);
+		OP      : in  std_logic;
 		Hi      : out std_logic_vector(BIT_DEPTH - 1 downto 0);
 		Lo      : out std_logic_vector(BIT_DEPTH - 1 downto 0)
 	);
@@ -59,7 +60,7 @@ begin
 			end generate cols;
 		end generate rows;
 		
-		Product_proc: process (all) is begin
+		Product_proc: process (carry_array, and_array, add_array) is begin
 			for i in 0 to (2 * BIT_DEPTH) - 1 loop
 				if i = 0 then
 					Product(i) <= and_array(0)(0);
@@ -72,9 +73,17 @@ begin
 				end if;
 			end loop;
 		end process;
-	else generate
-		Product <= std_logic_vector(unsigned(A) * unsigned(B));
 	end generate struct_gen;
+
+	dsp_gen : if not USE_STRUCTURAL_ARCH generate
+		mul_proc : process(A, B, OP) is begin
+			if OP = '1' then
+				Product <= std_logic_vector(unsigned(A) * unsigned(B));
+			else
+				Product <= std_logic_vector(signed(A) * signed(B));
+			end if;
+		end process;
+	end generate dsp_gen;
 
 	Hi <= Product((2 * BIT_DEPTH) - 1 downto BIT_DEPTH);
 	Lo <= Product(BIT_DEPTH - 1 downto 0);

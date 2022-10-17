@@ -1,8 +1,7 @@
 library ieee;
-use ieee.std_logic_1164.ALL;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 use work.globals.all;
-
-use ieee.NUMERIC_std.ALL;
 
 entity Adder is
 	Generic (
@@ -18,13 +17,14 @@ end Adder;
 architecture SomeRandomName of Adder is
 
 signal carries : std_logic_vector (BIT_DEPTH - 1 downto 0) := (others => '0');
-signal OpB : std_logic_vector (BIT_DEPTH - 1 downto 0);
-
+signal OpB : std_logic_vector (BIT_DEPTH - 1 downto 0) := (others => '0');
+signal SumTmp : std_logic_vector (BIT_DEPTH downto 0) := (others => '0');
 begin
-	with OP select
+
+	struct_gen : if USE_STRUCTURAL_ARCH generate
+		with OP select
 		OpB <= not B when '1',
-				   B when others;
-	struct_gen : if USE_STRUCTURAL_ARCH = true generate
+			B when others;
 		gen_add : for i in 0 to BIT_DEPTH - 1 generate
 			add_0 : if i = 0 generate
 				adder_0 : entity work.FullAdder
@@ -35,7 +35,17 @@ begin
 					port map(A => A(i), B => OpB(i), Cin => carries(i - 1), Cout => carries(i), Sum => Sum(i));
 			end generate add_i;
 		end generate gen_add;
-	else generate
-		Sum <= std_logic_vector(unsigned(A) + unsigned(OpB) + OP);
 	end generate struct_gen;
+
+	dsp_gen : if not USE_STRUCTURAL_ARCH generate
+		subadd_proc : process(A, B, OP) is begin
+			if OP = '1' then
+				SumTmp <= std_logic_vector(resize(signed(A), BIT_DEPTH + 1) - resize(signed(B), BIT_DEPTH + 1));
+			else
+				SumTmp <= std_logic_vector(resize(signed(A), BIT_DEPTH + 1) + resize(signed(B), BIT_DEPTH + 1));
+			end if;
+		end process;
+		Sum <= SumTmp(BIT_DEPTH - 1 downto 0);
+	end generate dsp_gen;
+
 end SomeRandomName;
