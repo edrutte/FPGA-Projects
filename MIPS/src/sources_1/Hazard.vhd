@@ -11,6 +11,8 @@ entity Hazard is
 		MemtoRegM  : in  std_logic;
 		BranchD    : in  std_logic;
 		ALUSrcD    : in  std_logic;
+		LinkD      : in  std_logic;
+		Except     : in  std_logic_vector (3 downto 0);
 		WriteRegE  : in  std_logic_vector (4 downto 0);
 		WriteRegM  : in  std_logic_vector (4 downto 0);
 		RsD        : in  std_logic_vector (4 downto 0);
@@ -38,30 +40,40 @@ architecture Behavioral of Hazard is
 signal lwStall         : std_logic;
 signal branchStallTmp1 : std_logic;
 signal branchStallTmp2 : std_logic;
-signal branchStall     : std_logic;
+signal Stall           : std_logic;
+signal RegSrcA_tmp     : std_logic_vector (BIT_DEPTH - 1 downto 0) := (others => '0');
 signal RegSrcB_tmp     : std_logic_vector (BIT_DEPTH - 1 downto 0) := (others => '0');
+signal ExceptStall     : std_logic;
 
 begin
 
+RegSrcA_tmp_proc : process (RsD, RD1D, WriteRegE, ALUResultE, MemOutM, ALUResultM, WriteRegM, RegWriteM, RegWriteE, MemtoRegM) is begin
+	case RsD is
+		when "00000" => RegSrcA_tmp <= RD1D;
+		when others =>
+			case (RsD xor WriteRegE) & RegWriteE is
+				when "000001" => RegSrcA_tmp <= ALUResultE;
+				when others =>
+					case (RsD xor WriteRegM) & RegWriteM is
+						when "000001" =>
+							if MemtoRegM = '1' then
+								RegSrcA_tmp <= MemOutM;
+							else
+								RegSrcA_tmp <= ALUResultM;
+							end if;
+						when others => RegSrcA_tmp <= RD1D;
+					end case;
+			end case;
+	end case;
+end process;
+
 RegSrcA_proc : process (clk) is begin
 	if rising_edge(clk) then
-		case RsD is
-			when "00000" => RegSrcA <= RD1D;
-			when others =>
-				case (RsD xor WriteRegE) & RegWriteE is
-					when "000001" => RegSrcA <= ALUResultE;
-					when others =>
-						case (RsD xor WriteRegM) & RegWriteM is
-							when "000001" =>
-								if MemtoRegM = '1' then
-									RegSrcA <= MemOutM;
-								else
-									RegSrcA <= ALUResultM;
-								end if;
-							when others => RegSrcA <= RD1D;
-						end case;
-				end case;
-		end case;
+		if LinkD = '1' then
+			RegSrcA <= RD1D;
+		else
+			RegSrcA <= RegSrcA_tmp;
+		end if;
 	end if;
 end process;
 
@@ -87,29 +99,17 @@ end process;
 
 RegSrcB_proc : process (clk) is begin
 	if rising_edge(clk) then
-		case std_logic_vector'(lwStall & branchStall & ALUSrcD) is
-			when "001" => RegSrcB <= SignImmD;
-			when "000" => RegSrcB <= RegSrcB_tmp;
+		case std_logic_vector'(Stall & ALUSrcD) is
+			when "01" => RegSrcB <= SignImmD;
+			when "00" => RegSrcB <= RegSrcB_tmp;
 			when others => RegSrcB <= (others => '0');
 		end case;
 	end if;
 end process;
 
-ForwardAD_proc : process (RsD, WriteRegM, RegWriteM, RD1D, ALUResultM) is begin
-	if RsD /= "00000" and (RsD = WriteRegM) and RegWriteM = '1' then
-		CmpData1 <= ALUResultM;
-	else
-		CmpData1 <= RD1D;
-	end if;
-end process;
+CmpData1 <= RegSrcA_tmp;
 
-ForwardBD_proc : process (RtD, WriteRegM, RegWriteM, RD2D, ALUResultM) is begin
-	if RtD /= "00000" and (RtD = WriteRegM) and RegWriteM = '1' then
-		CmpData2 <= ALUResultM;
-	else
-		CmpData2 <= RD2D;
-	end if;
-end process;
+CmpData2 <= RegSrcB_tmp;
 
 lwStall_proc : process (RsD, RtD, RtE, MemtoRegE) is begin
 	if RsD = RtE or RtD = RtE then
@@ -119,12 +119,39 @@ lwStall_proc : process (RsD, RtD, RtE, MemtoRegE) is begin
 	end if;
 end process;
 
-BranchStallTmp1 <= (BranchD and RegWriteE) when (WriteRegE = RsD) or (WriteRegE = RtD) else '0';
-BranchStallTmp2 <= (BranchD and MemToRegM) when (WriteRegM = RsD) or (WriteRegM = RtD) else '0';
-branchStall <= branchStallTmp1 or branchStallTmp2;
-StallF <= lwStall or branchStall;
-StallD <= lwStall or branchStall;
-FlushE <= lwStall or branchStall;
+BranchStallTmp1_proc : process (BranchD, RsD, RegWriteE, WriteRegE, MemtoRegM, WriteRegM) is begin
+	if RsD /= "00000" then
+		if RsD = WriteRegE then
+			BranchStallTmp1 <= BranchD and RegWriteE;
+		elsif RsD = WriteRegM then
+			BranchStallTmp1 <= BranchD and MemtoRegM;
+		else
+			BranchStallTmp1 <= '0';
+		end if;
+	else
+		BranchStallTmp1 <= '0';
+	end if;
+end process;
+
+BranchStallTmp2_proc : process (BranchD, RtD, RegWriteE, WriteRegE, MemtoRegM, WriteRegM) is begin
+	if RtD /= "00000" then
+		if RtD = WriteRegE then
+			BranchStallTmp2 <= BranchD and RegWriteE;
+		elsif RtD = WriteRegM then
+			BranchStallTmp2 <= BranchD and MemtoRegM;
+		else
+			BranchStallTmp2 <= '0';
+		end if;
+	else
+		BranchStallTmp2 <= '0';
+	end if;
+end process;
+
+ExceptStall <= '1' when Except /= "0000" else '0';
+Stall <= branchStallTmp1 or branchStallTmp2 or lwStall or ExceptStall;
+StallF <= Stall;
+StallD <= Stall;
+FlushE <= Stall;
 WriteData <= RegSrcB_tmp;
 
 end Behavioral;

@@ -14,7 +14,6 @@ entity core is
 		d_out       : out std_logic_vector (BIT_DEPTH - 1 downto 0);
 		dataAddr    : out std_logic_vector (DATA_ADDR_BITS - 1 downto 0)
 	);
-
 end core;
 
 architecture Behavioral of core is
@@ -77,18 +76,21 @@ signal RegSrcA, RegSrcB : std_logic_vector (BIT_DEPTH - 1 downto 0) := (others =
 
 signal CmpData1, CmpData2 : std_logic_vector (BIT_DEPTH - 1 downto 0) := (others => '0');
 
+signal ExceptD : std_logic_vector (3 downto 0) := "0000";
+
 begin
 
 F_reg : process (clk) is begin
 	if rising_edge(clk) then
 		if rst = '1' then
 			PC <= (others => '0');
-		elsif StallF = '0' then
-			if PCSrcD = '0' then
-				PC <= PCPlus4F;
-			else
-				PC <= PCBranchD;
-			end if;
+		else
+			case StallF & PCSrcD & ExceptD is
+				when "100000" | "110000" => PC <= PC;
+				when "000000" => PC <= PCPlus4F;
+				when "010000" => PC <= PCBranchD;
+				when others => PC <= ExceptD & 24x"0";
+			end case;
 		end if;
 	end if;
 end process;
@@ -114,7 +116,6 @@ Decode : entity work.InstructionDecode
 		Link         => LinkD,
 		CalcBranch   => BranchCalcD,
 		PCSrc        => PCSrcD,
-		ALUControl   => ALUControlD,
 		ALUSrc       => ALUSrcD,
 		RegDst       => RegDstD,
 		we_hi        => RegWriteHiD,
@@ -125,18 +126,24 @@ Decode : entity work.InstructionDecode
 		RdDest       => RdD,
 		RsDest       => RsD,
 		ImmOut       => ImmD,
-		PCBranch     => PCBranchD
+		PCBranch     => PCBranchD,
+		ALUControl   => ALUControlD,
+		Except       => ExceptD
 	);
 
 D_reg : process (clk) is begin
 	if rising_edge(clk) then
-		if TakeDelaySlot = '0' then
-			decodeIn <= (others => '0');
-			PCPlus4D <= (others => '0');
-		elsif StallD = '0' then
-			decodeIn <= fetchOut;
-			PCPlus4D <= PCPlus4F;
-		end if;
+		case TakeDelaySlot & StallD & ExceptD is
+			when "110000" =>
+				decodeIn <= decodeIn;
+				PCPlus4D <= PCPlus4D;
+			when "100000" =>
+				decodeIn <= fetchOut;
+				PCPlus4D <= PCPlus4F;
+			when others =>
+				decodeIn <= (others => '0');
+				PCPlus4D <= (others => '0');
+		end case;
 	end if;
 end process;
 	    
@@ -149,6 +156,8 @@ Hazard : entity work.Hazard
 		MemtoRegM  => MemToRegM,
 		BranchD    => BranchCalcD,
 		ALUSrcD    => ALUSrcD,
+		LinkD      => LinkD,
+		Except     => ExceptD,
 		WriteRegE  => WriteRegE,
 		WriteRegM  => WriteRegM,
 		RsD        => RsD,
@@ -172,17 +181,17 @@ Hazard : entity work.Hazard
 
 Execute : entity work.Execute
 	Port map(
-		ALUControl  => ALUControlE,
-		RegDst      => RegDstE,
-		RegWriteHi  => RegWriteHiE,
-		RegWriteLo  => RegWriteLoE,
-		RegSrcA     => RegSrcA,
-		RegSrcB     => RegSrcB,
-		RtDest      => RtE,
-		RdDest      => RdE,
-		ALUResult   => ALUResultE,
-		Hi          => HiWriteDataE,
-		WriteReg    => WriteRegE
+		ALUControl => ALUControlE,
+		RegDst     => RegDstE,
+		RegWriteHi => RegWriteHiE,
+		RegWriteLo => RegWriteLoE,
+		RegSrcA    => RegSrcA,
+		RegSrcB    => RegSrcB,
+		RtDest     => RtE,
+		RdDest     => RdE,
+		ALUResult  => ALUResultE,
+		Hi         => HiWriteDataE,
+		WriteReg   => WriteRegE
 	);
 
 E_reg : process (clk, FlushE) is begin
@@ -193,24 +202,22 @@ E_reg : process (clk, FlushE) is begin
 			RegWriteE   <= '0';
 			MemWriteE   <= '0';
 			MemtoRegE   <= '0';
-			RegDstE     <= '0';
 		else
 			RegWriteHiE <= RegWriteHiD;
 			RegWriteLoE <= RegWriteLoD;
 			RegWriteE   <= RegWriteD;
 			MemWriteE   <= MemWriteD;
 			MemtoRegE   <= MemtoRegD;
-			RegDstE     <= RegDstD;
 		end if;
 	end if;
 end process;
 
 Wb : entity work.Writeback
 	Port map(
-		MemtoReg    => MemtoRegW,
-		ALUResult   => ALUResultW,
-		ReadData    => MemOutW,
-		Result      => result
+		MemtoReg  => MemtoRegW,
+		ALUResult => ALUResultW,
+		ReadData  => MemOutW,
+		Result    => result
 	);
 
 stageDiv : process (clk) is begin
@@ -237,6 +244,7 @@ stageDiv : process (clk) is begin
 		MemOutW      <= MemOutM;
 		HiWriteDataM <= HiWriteDataE;
 		HiWriteDataW <= HiWriteDataM;
+		RegDstE      <= RegDstD;
 	end if;
 end process;
 

@@ -54,19 +54,20 @@ constant br_prg : mem_type:= (
 constant sub_prg : mem_type := (
 
 	x"20", x"10", x"00", x"00", --addi $s0, $zero, 0x0
-	x"0C", x"00", x"00", x"08", --jal 0x8
+	x"0c", x"00", x"00", x"09", --jal 0x9
 	x"20", x"08", x"11", x"11", --addi $t0, $zero, 0x1111
-	x"AE", x"08", x"00", x"00", --sw $t0, 0x0($s0)
-	x"0C", x"00", x"00", x"0C", --jal 0xc
+	x"ae", x"08", x"00", x"00", --sw $t0, 0x0($s0)
+	x"20", x"02", x"00", x"34", --addi $v0, $zero, 0x34
+	x"00", x"40", x"a8", x"09", --jalr $s5, $v0
 	x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1
-	x"08", x"00", x"00", x"0F", --j 0xf
-	x"AE", x"10", x"00", x"00", --sw $s0, 0x0($s0)
-	x"AE", x"1F", x"00", x"00", --sw $ra, 0x0($s0)
+	x"08", x"00", x"00", x"10", --j 0x10
+	x"ae", x"10", x"00", x"00", --sw $s0, 0x0($s0)
+	x"ae", x"1f", x"00", x"00", --sw $ra, 0x0($s0)
 	x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1
-	x"03", x"E0", x"00", x"08", --jr $ra
+	x"03", x"e0", x"00", x"08", --jr $ra
 	x"20", x"08", x"22", x"22", --addi $t0, $zero, 0x2222
-	x"AE", x"1F", x"00", x"00", --sw $ra, 0x0($s0)
-	x"03", x"E0", x"00", x"08", --jr $ra
+	x"ae", x"15", x"00", x"00", --sw $s5, 0x0($s0)
+	x"02", x"a0", x"00", x"08", --jr $s5
 	x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1
 
 	others => (others => '0')
@@ -95,6 +96,13 @@ constant hilo_prg : mem_type := (
 	x"ae", x"0b", x"00", x"02", --sw $t3, 0x2($s0)
 	x"00", x"00", x"00", x"00", --noop so that wait until we = '1' will catch each store
 	x"ae", x"0a", x"00", x"03", --sw $t2, 0x3($s0)
+
+	others => (others => '0')
+);
+
+constant except_prg : mem_type := (
+
+	--write me
 
 	others => (others => '0')
 );
@@ -267,8 +275,8 @@ sub_test : if test_prg = sub_prg generate
 			report "Expected sub #1 to return " & to_hex_string(32x"2222") & " but got " & to_hex_string(writeData)
 			severity error;
 		wait until we = '1';
-		assert writeData = 32x"18"
-			report "Expected return address for sub #2 to be " & to_hex_string(32x"18") & " but got " & to_hex_string(writeData)
+		assert writeData = 32x"1c"
+			report "Expected return address for sub #2 to be " & to_hex_string(32x"1c") & " but got " & to_hex_string(writeData)
 			severity error;
 		wait until we = '1';
 		assert writeData = 32x"3"
@@ -281,7 +289,21 @@ sub_test : if test_prg = sub_prg generate
 			severity failure;
 	end process;
 end generate;
-	
+
+except_test : if test_prg = except_prg generate
+	test_proc : process is begin
+		wait until clk = '0';
+		rst <= '0';
+		wait until we = '1';
+
+		--write me
+
+		assert FALSE
+			report "End of testbench"
+			severity failure;
+	end process;
+end generate;
+
 sw <= "10010110";
 
 end Behavioral;

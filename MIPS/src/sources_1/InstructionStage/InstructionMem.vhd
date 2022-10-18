@@ -2,6 +2,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 
 package mem_package is
+	type handler_type is array (0 to 127) of std_logic_vector (7 downto 0);
 	type mem_type is array (0 to 1023) of std_logic_vector (7 downto 0);
 	constant fib_prg : mem_type := (
 
@@ -43,6 +44,12 @@ package mem_package is
 
 	others => (others => '0')
 );
+	constant inf_loop_handler : handler_type := (
+
+	x"10", x"00", x"ff", x"ff", --beq $zero, $zero -0x1
+
+	others => (others => '0')
+);
 end package mem_package;
 
 library ieee;
@@ -61,18 +68,38 @@ end InstructionMem;
 architecture SomeRandomName of InstructionMem is
 
 signal mem_data : mem_type := PRG;
+signal break_handler, trap_handler, syscall_handler : handler_type := inf_loop_handler;
 
 begin
 
 mem_proc : process (addr) is begin
-	if addr(27 downto 10) = std_logic_vector(to_unsigned(0, 18)) then
-		d_out <= mem_data(to_integer(unsigned(std_logic_vector'(addr(9 downto 2) & "00"))))&
-			mem_data(to_integer(unsigned(std_logic_vector'(addr(9 downto 2) & "01"))))&
-			mem_data(to_integer(unsigned(std_logic_vector'(addr(9 downto 2) & "10"))))&
-			mem_data(to_integer(unsigned(std_logic_vector'(addr(9 downto 2) & "11"))));
-	else
-		d_out <= std_logic_vector(to_unsigned(0, 32));
-	end if;
+	case addr(27 downto 24) is
+		when "0000" =>
+			if addr(23 downto 10) = std_logic_vector(to_unsigned(0, 14)) then
+				d_out <= mem_data(to_integer(unsigned(std_logic_vector'(addr(9 downto 2) & "00"))))&
+						mem_data(to_integer(unsigned(std_logic_vector'(addr(9 downto 2) & "01"))))&
+						mem_data(to_integer(unsigned(std_logic_vector'(addr(9 downto 2) & "10"))))&
+						mem_data(to_integer(unsigned(std_logic_vector'(addr(9 downto 2) & "11"))));
+			else
+				d_out <= (others => '0');
+			end if;
+		when "0001" =>
+			d_out <= trap_handler(to_integer(unsigned(std_logic_vector'(addr(6 downto 2) & "00"))))&
+					trap_handler(to_integer(unsigned(std_logic_vector'(addr(6 downto 2) & "01"))))&
+					trap_handler(to_integer(unsigned(std_logic_vector'(addr(6 downto 2) & "10"))))&
+					trap_handler(to_integer(unsigned(std_logic_vector'(addr(6 downto 2) & "11"))));
+		when "0010" =>
+			d_out <= break_handler(to_integer(unsigned(std_logic_vector'(addr(6 downto 2) & "00"))))&
+					break_handler(to_integer(unsigned(std_logic_vector'(addr(6 downto 2) & "01"))))&
+					break_handler(to_integer(unsigned(std_logic_vector'(addr(6 downto 2) & "10"))))&
+					break_handler(to_integer(unsigned(std_logic_vector'(addr(6 downto 2) & "11"))));
+		when "0011" =>
+			d_out <= syscall_handler(to_integer(unsigned(std_logic_vector'(addr(6 downto 2) & "00"))))&
+					syscall_handler(to_integer(unsigned(std_logic_vector'(addr(6 downto 2) & "01"))))&
+					syscall_handler(to_integer(unsigned(std_logic_vector'(addr(6 downto 2) & "10"))))&
+					syscall_handler(to_integer(unsigned(std_logic_vector'(addr(6 downto 2) & "11"))));
+		when others => d_out <= (others => '0'); --reserved for new exception types
+	end case;
 end process;
 
 end SomeRandomName;
