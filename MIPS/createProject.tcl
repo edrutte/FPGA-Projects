@@ -10,6 +10,8 @@ proc setupFiles {} {
     add_files -fileset constrs_1 "src/constrs_1/mercury2_baseboard.xdc"
     add_files -fileset sim_1 "src/sim_1/MipsTB.vhd"
     set_property FILE_TYPE {VHDL 2008} [get_files {core.vhd InstructionDecode.vhd MipsTB.vhd}]
+    set_property used_in_simulation false [get_files MIPS.vhd]
+    set_property top MipsTB [get_filesets sim_1]
 }
 
 proc genMMCM {} {
