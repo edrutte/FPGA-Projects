@@ -46,7 +46,7 @@ signal PCBranchD : std_logic_vector (27 downto 0) := (others => '0');
 
 signal ALUControlD, ALUControlE : std_logic_vector (3 downto 0) := (others => '0');
 
-signal ALUSrcD, ALUSrcE : std_logic := '0';
+signal ALUSrcD: std_logic := '0';
 
 signal RegDstD, RegDstE : std_logic := '0';
 
@@ -89,7 +89,7 @@ F_reg : process (clk) is begin
 				when "100000" | "110000" => PC <= PC;
 				when "000000" => PC <= PCPlus4F;
 				when "010000" => PC <= PCBranchD;
-				when others => PC <= ExceptD & 24x"0";
+				when others => PC <= ExceptD & x"000000";
 			end case;
 		end if;
 	end if;
@@ -122,10 +122,10 @@ Decode : entity work.InstructionDecode
 		we_lo        => RegWriteLoD,
 		OpA          => RD1D,
 		RD2          => RD2D,
+		ImmOut       => ImmD,
 		RtDest       => RtD,
 		RdDest       => RdD,
 		RsDest       => RsD,
-		ImmOut       => ImmD,
 		PCBranch     => PCBranchD,
 		ALUControl   => ALUControlD,
 		Except       => ExceptD
@@ -153,7 +153,7 @@ Hazard : entity work.Hazard
 		RegWriteE  => RegWriteE,
 		RegWriteM  => RegWriteM,
 		MemtoRegE  => MemtoRegE,
-		MemtoRegM  => MemToRegM,
+		MemtoRegM  => MemtoRegM,
 		BranchD    => BranchCalcD,
 		ALUSrcD    => ALUSrcD,
 		LinkD      => LinkD,
@@ -181,7 +181,6 @@ Hazard : entity work.Hazard
 
 Execute : entity work.Execute
 	Port map(
-		ALUControl => ALUControlE,
 		RegDst     => RegDstE,
 		RegWriteHi => RegWriteHiE,
 		RegWriteLo => RegWriteLoE,
@@ -189,12 +188,13 @@ Execute : entity work.Execute
 		RegSrcB    => RegSrcB,
 		RtDest     => RtE,
 		RdDest     => RdE,
-		ALUResult  => ALUResultE,
+		ALUControl => ALUControlE,
 		Hi         => HiWriteDataE,
+		ALUResult  => ALUResultE,
 		WriteReg   => WriteRegE
 	);
 
-E_reg : process (clk, FlushE) is begin
+E_reg : process (clk) is begin
 	if rising_edge(clk) then
 		if FlushE = '1' then
 			RegWriteHiE <= '0';

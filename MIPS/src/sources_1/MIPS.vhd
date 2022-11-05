@@ -115,12 +115,12 @@ cpu : entity work.core
 	Port map(
 		clk         => clk_out1,
 		rst         => rst_debounce,
-		PC          => PC,
 		Instruction => Instruction,
-		dataAddr    => dataAddr,
 		d_in        => readData,
 		we          => we,
-		d_out       => writeData
+		PC          => PC,
+		d_out       => writeData,
+		dataAddr    => dataAddr
 	);
 
 memD : entity work.DataMem

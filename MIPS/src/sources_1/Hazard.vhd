@@ -38,8 +38,8 @@ end Hazard;
 architecture Behavioral of Hazard is
 
 signal lwStall         : std_logic;
-signal branchStallTmp1 : std_logic;
-signal branchStallTmp2 : std_logic;
+signal BranchStallTmp1 : std_logic;
+signal BranchStallTmp2 : std_logic;
 signal Stall           : std_logic;
 signal RegSrcA_tmp     : std_logic_vector (BIT_DEPTH - 1 downto 0) := (others => '0');
 signal RegSrcB_tmp     : std_logic_vector (BIT_DEPTH - 1 downto 0) := (others => '0');
@@ -148,7 +148,7 @@ BranchStallTmp2_proc : process (BranchD, RtD, RegWriteE, WriteRegE, MemtoRegM, W
 end process;
 
 ExceptStall <= '1' when Except /= "0000" else '0';
-Stall <= branchStallTmp1 or branchStallTmp2 or lwStall or ExceptStall;
+Stall <= BranchStallTmp1 or BranchStallTmp2 or lwStall or ExceptStall;
 StallF <= Stall;
 StallD <= Stall;
 FlushE <= Stall;

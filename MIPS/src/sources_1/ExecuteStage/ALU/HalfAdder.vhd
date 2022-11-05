@@ -13,7 +13,7 @@ architecture arch of HalfAdder is
 begin
 	
 	Cout <= A and B; -- check carry
-	sum <= A xor B; -- add bits
+	Sum <= A xor B; -- add bits
 	
 end;
 

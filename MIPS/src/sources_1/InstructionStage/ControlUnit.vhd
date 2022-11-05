@@ -150,14 +150,9 @@ ALUControl_proc : process (Opcode, Funct) is begin
 	end case;
 end process;
 
-CalcBranch_proc : process (Opcode, RegImmInst, Funct) is begin
+CalcBranch_proc : process (Opcode, RegImmInst) is begin
 	case Opcode is
 		when "000100" | "000101" | "000111" | "000110" => CalcBranch <= '1';
-		--when "000000" =>
-		--	case Funct is
-		--		when "001000" | "001001" => CalcBranch <= '1';
-		--		when others => CalcBranch <= '0';
-		--	end case;
 		when "000001" =>
 			case RegImmInst is
 				when "00000" | "00001" => CalcBranch <= '1';

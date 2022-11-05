@@ -28,11 +28,11 @@ begin
 		gen_add : for i in 0 to BIT_DEPTH - 1 generate
 			add_0 : if i = 0 generate
 				adder_0 : entity work.FullAdder
-					port map(A => A(i), B => OpB(i), Cin => OP, Cout => carries(i), Sum => Sum(i));
+					port map(A => A(i), B => OpB(i), Cin => OP, Sum => Sum(i), Cout => carries(i));
 				end generate add_0;
 			add_i : if i > 0 generate
 				adder_i : entity work.FullAdder
-					port map(A => A(i), B => OpB(i), Cin => carries(i - 1), Cout => carries(i), Sum => Sum(i));
+					port map(A => A(i), B => OpB(i), Cin => carries(i - 1), Sum => Sum(i), Cout => carries(i));
 			end generate add_i;
 		end generate gen_add;
 	end generate struct_gen;

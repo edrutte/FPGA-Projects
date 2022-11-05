@@ -72,7 +72,7 @@ signal break_handler, trap_handler, syscall_handler : handler_type := inf_loop_h
 
 begin
 
-mem_proc : process (addr) is begin
+mem_proc : process (addr, break_handler, mem_data, syscall_handler, trap_handler) is begin
 	case addr(27 downto 24) is
 		when "0000" =>
 			if addr(23 downto 10) = std_logic_vector(to_unsigned(0, 14)) then

@@ -83,8 +83,8 @@ RegFile : entity work.RegisterFile
 		rd_hi => rd_hi,
 		rd_lo => rd_lo,
 		we    => RegWriteEn,
-		we_hi => RegWriteHi,
 		we_lo => RegWriteLo,
+		we_hi => RegWriteHi,
 		RD1   => RD1,
 		RD2   => RD2
 	);

@@ -18,16 +18,16 @@ begin
 		port map(
 			A => A,
 			B => B,
-			Cout => s_1,
-			Sum => s_2
+			Sum => s_2,
+			Cout => s_1
 		);
 
 	HAdder2 : entity work.HalfAdder
 		port map(
 			A => Cin,
 			B => s_2,
-			Cout => s_3,
-			Sum => Sum
+			Sum => Sum,
+			Cout => s_3
 		);
 
 	Cout <= s_1 or s_3;
