@@ -15,7 +15,7 @@ end UART_Rx;
 architecture SomeRandomName of UART_Rx is
 
 type state_type is (hold, start_bit, recieve, end_bit);
-signal state, next_state : state_type := Hold;
+signal state, next_state : state_type := hold;
 
 signal rx_data_buf : std_logic_vector (7 downto 0) := (others => '0');
 signal rx_data_sr : std_logic_vector (7 downto 0) := (others => '0');
@@ -62,7 +62,7 @@ rx_data_sr_proc : process (clk) is begin
 	if rising_edge(clk) and baud_en = '1' then
 		if next_state = start_bit then
 			rx_data_sr <= "00000000";
-		elsif next_state = Recieve then
+		elsif next_state = recieve then
 			rx_data_sr <= rx_in & rx_data_sr (7 downto 1);
 		else
 			rx_data_sr <= rx_data_sr;

@@ -23,7 +23,7 @@ signal rx_data_led : std_logic_vector (15 downto 0);
 
 component seg7 is
     port(
-            Clock_50MHz : in std_logic;
+            clock_50MHz : in std_logic;
             displayed_number : in std_logic_vector (15 downto 0);
             Anode_Activate : out std_logic_vector (3 downto 0);
             LED_out : out std_logic_vector (6 downto 0)
