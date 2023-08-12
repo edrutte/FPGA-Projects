@@ -21,7 +21,7 @@ end MIPS;
 
 architecture Behavioral of MIPS is
 
-signal PC          : std_logic_vector (27 downto 0) := (others => '0');
+signal PC          : std_logic_vector (BIT_DEPTH - 1 downto 0) := (others => '0');
 signal Instruction : std_logic_vector (31 downto 0) := (others => '0');
 
 signal dataAddr    : std_logic_vector (DATA_ADDR_BITS - 1 downto 0);

@@ -7,12 +7,14 @@ entity Hazard is
 		clk        : in  std_logic;
 		RegWriteE  : in  std_logic;
 		RegWriteM  : in  std_logic;
+		COP0WriteE : in  std_logic;
+		COP0WriteM : in  std_logic;
 		MemtoRegE  : in  std_logic;
 		MemtoRegM  : in  std_logic;
 		BranchD    : in  std_logic;
 		ALUSrcD    : in  std_logic;
 		LinkD      : in  std_logic;
-		Except     : in  std_logic_vector (3 downto 0);
+		Except     : in  std_logic_vector (4 downto 0);
 		WriteRegE  : in  std_logic_vector (4 downto 0);
 		WriteRegM  : in  std_logic_vector (4 downto 0);
 		RsD        : in  std_logic_vector (4 downto 0);
@@ -77,14 +79,14 @@ RegSrcA_proc : process (clk) is begin
 	end if;
 end process;
 
-RegSrcB_tmp_proc : process (RtD, RD2D, WriteRegE, ALUResultE, MemOutM, ALUResultM, WriteRegM, RegWriteM, RegWriteE, MemtoRegM) is begin
+RegSrcB_tmp_proc : process (RtD, RD2D, WriteRegE, ALUResultE, MemOutM, ALUResultM, WriteRegM, RegWriteM, RegWriteE, COP0WriteM, COP0WriteE, MemtoRegM) is begin
 	case RtD is
 		when "00000" => RegSrcB_tmp <= RD2D;
 		when others =>
-			case (RtD xor WriteRegE) & RegWriteE is
+			case (RtD xor WriteRegE) & (RegWriteE or COP0WriteE) is
 				when "000001" => RegSrcB_tmp <= ALUResultE;
 				when others =>
-					case (RtD xor WriteRegM) & RegWriteM is
+					case (RtD xor WriteRegM) & (RegWriteM or COP0WriteM) is
 						when "000001" =>
 							if MemtoRegM = '1' then
 								RegSrcB_tmp <= MemOutM;
@@ -147,7 +149,7 @@ BranchStallTmp2_proc : process (BranchD, RtD, RegWriteE, WriteRegE, MemtoRegM, W
 	end if;
 end process;
 
-ExceptStall <= '1' when Except /= "0000" else '0';
+ExceptStall <= '1' when Except /= "00000" else '0';
 Stall <= BranchStallTmp1 or BranchStallTmp2 or lwStall or ExceptStall;
 StallF <= Stall;
 StallD <= Stall;

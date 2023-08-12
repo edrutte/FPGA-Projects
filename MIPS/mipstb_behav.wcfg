@@ -3,31 +3,27 @@
    <wave_state>
    </wave_state>
    <db_ref_list>
-      <db_ref path="MipsTB_behav.wdb" id="1">
+      <db_ref path="work.MipsTB.wdb" id="1">
          <top_modules>
             <top_module name="MipsTB" />
-            <top_module name="glbl" />
             <top_module name="globals" />
+            <top_module name="mem_package" />
          </top_modules>
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="1,665.600 ns"></ZoomStartTime>
-      <ZoomEndTime time="1,764.501 ns"></ZoomEndTime>
+      <ZoomStartTime time="0.000 ns"></ZoomStartTime>
+      <ZoomEndTime time="148.737 ns"></ZoomEndTime>
       <Cursor1Time time="2,000.000 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="215"></NameColumnWidth>
+      <NameColumnWidth column_width="211"></NameColumnWidth>
       <ValueColumnWidth column_width="66"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="16" />
+   <WVObjectSize size="7" />
    <wvobject type="logic" fp_name="/MipsTB/clk">
       <obj_property name="ElementShortName">clk</obj_property>
       <obj_property name="ObjectShortName">clk</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/MipsTB/uut/clk_out1">
-      <obj_property name="ElementShortName">clk_out1</obj_property>
-      <obj_property name="ObjectShortName">clk_out1</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/MipsTB/rst">
       <obj_property name="ElementShortName">rst</obj_property>
@@ -37,52 +33,20 @@
       <obj_property name="ElementShortName">sw[7:0]</obj_property>
       <obj_property name="ObjectShortName">sw[7:0]</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/MipsTB/an_7seg">
-      <obj_property name="ElementShortName">an_7seg[3:0]</obj_property>
-      <obj_property name="ObjectShortName">an_7seg[3:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/MipsTB/ag_seg">
-      <obj_property name="ElementShortName">ag_seg[6:0]</obj_property>
-      <obj_property name="ObjectShortName">ag_seg[6:0]</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/MipsTB/seg_dot">
-      <obj_property name="ElementShortName">seg_dot</obj_property>
-      <obj_property name="ObjectShortName">seg_dot</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/MipsTB/uut/Fetch/Instruction">
+   <wvobject type="array" fp_name="/MipsTB/cpu/Decode/Instruction">
       <obj_property name="ElementShortName">Instruction[31:0]</obj_property>
       <obj_property name="ObjectShortName">Instruction[31:0]</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/MipsTB/uut/Fetch/PC">
-      <obj_property name="ElementShortName">PC[27:0]</obj_property>
-      <obj_property name="ObjectShortName">PC[27:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/MipsTB/uut/Decode/Instruction">
-      <obj_property name="ElementShortName">Instruction[31:0]</obj_property>
-      <obj_property name="ObjectShortName">Instruction[31:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/MipsTB/uut/Decode/RegFile/mem_data[8]">
-      <obj_property name="ElementShortName">[8][31:0]</obj_property>
-      <obj_property name="ObjectShortName">[8][31:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/MipsTB/uut/Decode/RegFile/mem_data[16]">
-      <obj_property name="ElementShortName">[16][31:0]</obj_property>
-      <obj_property name="ObjectShortName">[16][31:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/MipsTB/uut/Decode/RegFile/mem_data[31]">
-      <obj_property name="ElementShortName">[31][31:0]</obj_property>
-      <obj_property name="ObjectShortName">[31][31:0]</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/MipsTB/uut/PCSrcF">
-      <obj_property name="ElementShortName">PCSrcF</obj_property>
-      <obj_property name="ObjectShortName">PCSrcF</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/MipsTB/uut/PCSrcD">
+   <wvobject type="logic" fp_name="/MipsTB/cpu/PCSrcD">
       <obj_property name="ElementShortName">PCSrcD</obj_property>
       <obj_property name="ObjectShortName">PCSrcD</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/MipsTB/uut/Mem/mem/data_mem">
-      <obj_property name="ElementShortName">data_mem[0:1023][31:0]</obj_property>
-      <obj_property name="ObjectShortName">data_mem[0:1023][31:0]</obj_property>
+   <wvobject type="array" fp_name="/MipsTB/cpu/PC">
+      <obj_property name="ElementShortName">PC[31:0]</obj_property>
+      <obj_property name="ObjectShortName">PC[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/MipsTB/cpu/PCBranchD">
+      <obj_property name="ElementShortName">PCBranchD[31:0]</obj_property>
+      <obj_property name="ObjectShortName">PCBranchD[31:0]</obj_property>
    </wvobject>
 </wave_config>

@@ -2,7 +2,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 
 package mem_package is
-	type handler_type is array (0 to 127) of std_logic_vector (7 downto 0);
+	type handler_type is array (0 to 63) of std_logic_vector (7 downto 0);
 	type mem_type is array (0 to 1023) of std_logic_vector (7 downto 0);
 	constant fib_prg : mem_type := (
 
@@ -50,17 +50,30 @@ package mem_package is
 
 	others => (others => '0')
 );
+	constant debug_handler : handler_type := (
+
+	x"ac", x"08", x"00", x"ff", --sw $t0, 0xff($zero) ;save $t0
+	x"40", x"08", x"68", x"00", --mfc0 $t0, 0xd ;get cause reg
+	x"31", x"08", x"00", x"7c", --andi $t0, $t0, 0x7c ;isolate cause bits
+	x"00", x"08", x"40", x"82", --srl $t0, $t0, 0x2 ;shift cause to base of register
+	x"ac", x"08", x"01", x"00", --sw $t0, 0x100($zero) ;store cause
+	x"8c", x"08", x"00", x"ff", --lw $t0, 0xff($zero) ;restore $t0
+	x"42", x"00", x"00", x"18", --eret
+
+	others => (others => '0')
+);
 end package mem_package;
 
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
+use work.globals.all;
 use work.mem_package.all;
 
 entity InstructionMem is
 	Generic (PRG : mem_type := fib_prg);
 	Port (
-		addr  : in  std_logic_vector (27 downto 0);
+		addr  : in  std_logic_vector (BIT_DEPTH - 1 downto 0);
 		d_out : out std_logic_vector (31 downto 0) := (others => '0')
 	);
 end InstructionMem;
@@ -68,37 +81,27 @@ end InstructionMem;
 architecture SomeRandomName of InstructionMem is
 
 signal mem_data : mem_type := PRG;
-signal break_handler, trap_handler, syscall_handler : handler_type := inf_loop_handler;
+signal except_handler : handler_type := debug_handler;
 
 begin
 
-mem_proc : process (addr, break_handler, mem_data, syscall_handler, trap_handler) is begin
-	case addr(27 downto 24) is
-		when "0000" =>
-			if addr(23 downto 10) = std_logic_vector(to_unsigned(0, 14)) then
-				d_out <= mem_data(to_integer(unsigned(std_logic_vector'(addr(9 downto 2) & "00"))))&
-						mem_data(to_integer(unsigned(std_logic_vector'(addr(9 downto 2) & "01"))))&
-						mem_data(to_integer(unsigned(std_logic_vector'(addr(9 downto 2) & "10"))))&
-						mem_data(to_integer(unsigned(std_logic_vector'(addr(9 downto 2) & "11"))));
+mem_proc : process (addr, mem_data, except_handler) is begin
+	case addr(BIT_DEPTH - 1 downto 10) is
+		when x"00000" & "00" =>
+			d_out <= mem_data(to_integer(unsigned(std_logic_vector'(addr(9 downto 2) & "00"))))&
+					mem_data(to_integer(unsigned(std_logic_vector'(addr(9 downto 2) & "01"))))&
+					mem_data(to_integer(unsigned(std_logic_vector'(addr(9 downto 2) & "10"))))&
+					mem_data(to_integer(unsigned(std_logic_vector'(addr(9 downto 2) & "11"))));
+		when x"80000" & "00" =>
+			if addr(9 downto 7) = "011" then
+				d_out <= except_handler(to_integer(unsigned(std_logic_vector'(addr(6 downto 2) & "00"))))&
+						except_handler(to_integer(unsigned(std_logic_vector'(addr(6 downto 2) & "01"))))&
+						except_handler(to_integer(unsigned(std_logic_vector'(addr(6 downto 2) & "10"))))&
+						except_handler(to_integer(unsigned(std_logic_vector'(addr(6 downto 2) & "11"))));
 			else
 				d_out <= (others => '0');
 			end if;
-		when "0001" =>
-			d_out <= trap_handler(to_integer(unsigned(std_logic_vector'(addr(6 downto 2) & "00"))))&
-					trap_handler(to_integer(unsigned(std_logic_vector'(addr(6 downto 2) & "01"))))&
-					trap_handler(to_integer(unsigned(std_logic_vector'(addr(6 downto 2) & "10"))))&
-					trap_handler(to_integer(unsigned(std_logic_vector'(addr(6 downto 2) & "11"))));
-		when "0010" =>
-			d_out <= break_handler(to_integer(unsigned(std_logic_vector'(addr(6 downto 2) & "00"))))&
-					break_handler(to_integer(unsigned(std_logic_vector'(addr(6 downto 2) & "01"))))&
-					break_handler(to_integer(unsigned(std_logic_vector'(addr(6 downto 2) & "10"))))&
-					break_handler(to_integer(unsigned(std_logic_vector'(addr(6 downto 2) & "11"))));
-		when "0011" =>
-			d_out <= syscall_handler(to_integer(unsigned(std_logic_vector'(addr(6 downto 2) & "00"))))&
-					syscall_handler(to_integer(unsigned(std_logic_vector'(addr(6 downto 2) & "01"))))&
-					syscall_handler(to_integer(unsigned(std_logic_vector'(addr(6 downto 2) & "10"))))&
-					syscall_handler(to_integer(unsigned(std_logic_vector'(addr(6 downto 2) & "11"))));
-		when others => d_out <= (others => '0'); --reserved for new exception types
+		when others => d_out <= (others => '0');
 	end case;
 end process;
 

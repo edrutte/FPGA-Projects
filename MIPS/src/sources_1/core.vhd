@@ -10,7 +10,7 @@ entity core is
 		Instruction : in  std_logic_vector (31 downto 0);
 		d_in        : in  std_logic_vector (BIT_DEPTH - 1 downto 0);
 		we          : out std_logic;
-		PC          : out std_logic_vector (27 downto 0) := (others => '0');
+		PC          : out std_logic_vector (BIT_DEPTH - 1 downto 0) := (others => '0');
 		d_out       : out std_logic_vector (BIT_DEPTH - 1 downto 0);
 		dataAddr    : out std_logic_vector (DATA_ADDR_BITS - 1 downto 0)
 	);
@@ -21,6 +21,8 @@ architecture Behavioral of core is
 signal fetchOut, decodeIn : std_logic_vector (31 downto 0 ) := (others => '0');
 
 signal RegWriteD, RegWriteE, RegWriteM, RegWriteW : std_logic := '0';
+
+signal COP0WriteD, COP0WriteE, COP0WriteM, COP0WriteW : std_logic := '0';
 
 signal RegWriteHiD, RegWriteHiE, RegWriteHiM, RegWriteHiW : std_logic := '0';
 
@@ -40,9 +42,11 @@ signal TakeDelaySlot : std_logic := '1';
 
 signal PCSrcD : std_logic := '0';
 
-signal PCPlus4F, PCPlus4D : std_logic_vector (27 downto 0) := (others => '0');
+signal PCPlus4F, PCPlus4D : std_logic_vector (BIT_DEPTH - 1 downto 0) := (others => '0');
 
-signal PCBranchD : std_logic_vector (27 downto 0) := (others => '0');
+signal PCBranchD : std_logic_vector (BIT_DEPTH - 1 downto 0) := (others => '0');
+
+signal EPCD : std_logic_vector (BIT_DEPTH - 1 downto 0) := (others => '0');
 
 signal ALUControlD, ALUControlE : std_logic_vector (3 downto 0) := (others => '0');
 
@@ -76,26 +80,44 @@ signal RegSrcA, RegSrcB : std_logic_vector (BIT_DEPTH - 1 downto 0) := (others =
 
 signal CmpData1, CmpData2 : std_logic_vector (BIT_DEPTH - 1 downto 0) := (others => '0');
 
-signal ExceptD : std_logic_vector (3 downto 0) := "0000";
+signal COP0DataD : std_logic_vector (BIT_DEPTH - 1 downto 0);
+
+signal ExceptD : std_logic_vector (4 downto 0) := "00000";
+
+signal EretD, EretE, EretM, EretW : std_logic := '0';
 
 begin
+
+COP0 : entity work.COP0
+	port map(
+		clk   => clk,
+		we    => COP0WriteW,
+		eret  => EretW,
+		Addr1 => RdD,
+		Addr2 => WriteRegW,
+		Cause => ExceptD,
+		EPC   => PCPlus4F,
+		wd    => result,
+		PC    => EPCD,
+		RD1   => COP0DataD
+	);
 
 F_reg : process (clk) is begin
 	if rising_edge(clk) then
 		if rst = '1' then
 			PC <= (others => '0');
 		else
-			case StallF & PCSrcD & ExceptD is
+			case StallF & PCSrcD & ExceptD(4 downto 1) is --ExceptD = 00001 is TLB related so N/A
 				when "100000" | "110000" => PC <= PC;
 				when "000000" => PC <= PCPlus4F;
 				when "010000" => PC <= PCBranchD;
-				when others => PC <= ExceptD & x"000000";
+				when others => PC <= x"80000180";
 			end case;
 		end if;
 	end if;
 end process;
 
-PCPlus4F <= std_logic_vector(to_unsigned((to_integer(unsigned(PC)) + 4), 28));
+PCPlus4F <= std_logic_vector(to_unsigned((to_integer(unsigned(PC)) + 4), BIT_DEPTH));
 
 Decode : entity work.InstructionDecode
 	Port map(
@@ -104,22 +126,27 @@ Decode : entity work.InstructionDecode
 		RegWriteAddr => WriteRegW,
 		RegWriteData => result,
 		HiWriteData  => HiWriteDataW,
+		COP0Data     => COP0DataD,
 		CmpData1     => CmpData1,
 		CmpData2     => CmpData2,
 		PCPlus4      => PCPlus4D,
+		EPC          => EPCD,
 		RegWriteEn   => RegWriteW,
 		RegWriteHi   => RegWriteHiW,
 		RegWriteLo   => RegWriteLoW,
 		RegWrite     => RegWriteD,
+		COP0Write    => COP0WriteD,
 		MemtoReg     => MemtoRegD,
 		MemWrite     => MemWriteD,
 		Link         => LinkD,
 		CalcBranch   => BranchCalcD,
+		TakeDelay    => TakeDelaySlot,
 		PCSrc        => PCSrcD,
 		ALUSrc       => ALUSrcD,
 		RegDst       => RegDstD,
 		we_hi        => RegWriteHiD,
 		we_lo        => RegWriteLoD,
+		eret         => EretD,
 		OpA          => RD1D,
 		RD2          => RD2D,
 		ImmOut       => ImmD,
@@ -133,7 +160,7 @@ Decode : entity work.InstructionDecode
 
 D_reg : process (clk) is begin
 	if rising_edge(clk) then
-		case TakeDelaySlot & StallD & ExceptD is
+		case TakeDelaySlot & StallD & ExceptD(4 downto 1) is --ExceptD = 00001 is TLB related so N/A
 			when "110000" =>
 				decodeIn <= decodeIn;
 				PCPlus4D <= PCPlus4D;
@@ -152,6 +179,8 @@ Hazard : entity work.Hazard
 		clk        => clk,
 		RegWriteE  => RegWriteE,
 		RegWriteM  => RegWriteM,
+		COP0WriteE => COP0WriteE,
+		COP0WriteM => COP0WriteM,
 		MemtoRegE  => MemtoRegE,
 		MemtoRegM  => MemtoRegM,
 		BranchD    => BranchCalcD,
@@ -202,12 +231,14 @@ E_reg : process (clk) is begin
 			RegWriteE   <= '0';
 			MemWriteE   <= '0';
 			MemtoRegE   <= '0';
+			EretE       <= '0';
 		else
 			RegWriteHiE <= RegWriteHiD;
 			RegWriteLoE <= RegWriteLoD;
 			RegWriteE   <= RegWriteD;
 			MemWriteE   <= MemWriteD;
 			MemtoRegE   <= MemtoRegD;
+			EretE       <= EretD;
 		end if;
 	end if;
 end process;
@@ -226,7 +257,11 @@ stageDiv : process (clk) is begin
 		RdE          <= RdD;
 		LinkE        <= LinkD;
 		ALUControlE  <= ALUControlD;
+		COP0WriteE   <= COP0WriteD;
+		COP0WriteM   <= COP0WriteE;
+		COP0WriteW   <= COP0WriteM;
 		RegWriteM    <= RegWriteE or LinkE;
+		RegWriteW    <= RegWriteM;
 		RegWriteHiM  <= RegWriteHiE;
 		RegWriteHiW  <= RegWriteHiM;
 		RegWriteLoM  <= RegWriteLoE;
@@ -234,7 +269,6 @@ stageDiv : process (clk) is begin
 		MemtoRegM    <= MemtoRegE;
 		MemtoRegW    <= MemtoRegM;
 		MemWriteM    <= MemWriteE;
-		RegWriteW    <= RegWriteM;
 		ALUResultM   <= ALUResultE;
 		ALUResultW   <= ALUResultM;
 		WriteDataE   <= WriteDataD;
@@ -245,6 +279,8 @@ stageDiv : process (clk) is begin
 		HiWriteDataM <= HiWriteDataE;
 		HiWriteDataW <= HiWriteDataM;
 		RegDstE      <= RegDstD;
+		EretM        <= EretE;
+		EretW        <= EretM;
 	end if;
 end process;
 

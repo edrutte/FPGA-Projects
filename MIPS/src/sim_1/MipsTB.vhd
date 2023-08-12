@@ -10,7 +10,7 @@ end MipsTB;
 architecture Behavioral of MipsTB is
 
 signal Instruction      : std_logic_vector (31 downto 0) := (others => '0');
-signal PC               : std_logic_vector (27 downto 0) := (others => '0');
+signal PC               : std_logic_vector (31 downto 0) := (others => '0');
 signal sw               : std_logic_vector (7 downto 0);
 signal dataAddr         : std_logic_vector (DATA_ADDR_BITS - 1 downto 0);
 signal readData         : std_logic_vector (BIT_DEPTH - 1 downto 0);
@@ -112,11 +112,44 @@ constant hilo_prg : mem_type := (
 
 constant except_prg : mem_type := (
 
-	x"21", x"08", x"00", x"42", --addi $t0, $t0 0x42
-	x"0c", x"00", x"00", x"03", --jal 0x3
-	x"00", x"00", x"00", x"00",
+	x"20", x"10", x"00", x"00", --addi $s0, $zero, 0x0
+	x"20", x"11", x"00", x"03", --addi $s1, $zero, 0x3
+	x"20", x"12", x"00", x"01", --addi $s2, $zero, 0x1
 	x"00", x"00", x"00", x"0d", --break
-	x"ac", x"08", x"00", x"00", --sw $t0, 0x0($zero) but shouldn't be reachable
+	x"20", x"08", x"00", x"01", --addi $t0, $zero, 0x1
+	x"01", x"10", x"00", x"30", --tge $t0, $s0
+	x"1d", x"00", x"00", x"13", --bgtz $t0, 0x13
+	x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1
+	x"01", x"10", x"00", x"31", --tgeu $t0, $s0
+	x"05", x"01", x"00", x"12", --bgez $t0 0x12
+	x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1
+	x"01", x"10", x"00", x"33", --tltu $t0, $s0
+	x"05", x"00", x"00", x"11", --bltz $t0 0x11
+	x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1
+	x"01", x"11", x"00", x"36", --tne $t0, $s1
+	x"19", x"00", x"00", x"10", --blez $t0 0x10
+	x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1
+	x"01", x"10", x"00", x"32", --tlt $t0, $s0
+	x"11", x"11", x"00", x"0f", --beq $t0, $s1, 0xf
+	x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1
+	x"01", x"12", x"00", x"34", --teq $t0, $s2
+	x"15", x"12", x"00", x"0e", --bne $t0, $s2, 0xe
+	x"22", x"10", x"00", x"01", --addi $s0, $s0, 0x1
+	x"00", x"00", x"00", x"0c", --syscall
+	x"08", x"00", x"00", x"05", --j 0x5
+	x"00", x"00", x"00", x"00",
+	x"08", x"00", x"00", x"08", --j 0x8
+	x"21", x"08", x"ff", x"fd", --addi $t0, $t0, -0x3
+	x"08", x"00", x"00", x"0b", --j 0xb
+	x"21", x"08", x"ff", x"fe", --addi $t0, $t0, -0x2
+	x"08", x"00", x"00", x"0e", --j 0xe
+	x"21", x"08", x"00", x"07", --addi $t0, $t0, 0x7
+	x"08", x"00", x"00", x"11", --j 0x11
+	x"21", x"08", x"ff", x"fd", --addi $t0, $t0, -0x3
+	x"08", x"00", x"00", x"14", --j 0x14
+	x"21", x"08", x"ff", x"fe", --addi $t0, $t0, -0x2
+	x"08", x"00", x"00", x"05", --j 0x5
+	x"21", x"08", x"ff", x"ff", --addi $t0, $t0, -0x1
 
 	others => (others => '0')
 );
@@ -257,7 +290,7 @@ br_test : if test_prg = br_prg generate
 		assert writeData = 32x"1"
 			report "Expected write #24 in branch test to be " & to_hex_string(32x"1") & " but got " & to_hex_string(writeData)
 			severity error;
-		wait until we = '1';
+		wait until clk = '0';
 		assert FALSE
 			report "End of testbench"
 			severity failure;
@@ -325,9 +358,134 @@ except_test : if test_prg = except_prg generate
 		wait until clk = '0';
 		rst <= '0';
 		wait until we = '1';
-
-		--write me
-
+		assert writeData = 32x"0" --registers are initialized to 0 and exception should not take delay slot
+			report "Expected write #1 in except test to be " & to_hex_string(32x"0") & " but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"9"
+			report "Expected write #2 in except test to be " & to_hex_string(32x"9") & " indicating break, but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"1"
+			report "Expected write #3 in except test to be " & to_hex_string(32x"1") & " but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"D"
+			report "Expected write #4 in except test to be " & to_hex_string(32x"D") & " indicating trap, but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = x"FFFFFFFE"
+			report "Expected write #5 in except test to be " & to_hex_string(x"FFFFFFFE") & " but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"D"
+			report "Expected write #6 in except test to be " & to_hex_string(32x"D") & " indicating trap, but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"5"
+			report "Expected write #7 in except test to be " & to_hex_string(32x"5") & " but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"D"
+			report "Expected write #8 in except test to be " & to_hex_string(32x"D") & " indicating trap, but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"4"
+			report "Expected write #9 in except test to be " & to_hex_string(32x"4") & " but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"8"
+			report "Expected write #10 in except test to be " & to_hex_string(32x"8") & " indicating syscall, but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"6"
+			report "Expected write #11 in except test to be " & to_hex_string(32x"6") & " but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"D"
+			report "Expected write #12 in except test to be " & to_hex_string(32x"D") & " indicating trap, but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"6"
+			report "Expected write #13 in except test to be " & to_hex_string(32x"6") & " but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"D"
+			report "Expected write #14 in except test to be " & to_hex_string(32x"D") & " indicating trap, but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"5"
+			report "Expected write #15 in except test to be " & to_hex_string(32x"5") & " but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"8"
+			report "Expected write #16 in except test to be " & to_hex_string(32x"8") & " indicating syscall, but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"0"
+			report "Expected write #17 in except test to be " & to_hex_string(32x"0") & " but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"D"
+			report "Expected write #18 in except test to be " & to_hex_string(32x"D") & " indicating trap, but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"0"
+			report "Expected write #19 in except test to be " & to_hex_string(32x"0") & " but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"D"
+			report "Expected write #20 in except test to be " & to_hex_string(32x"D") & " indicating trap, but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = x"FFFFFFFD"
+			report "Expected write #21 in except test to be " & to_hex_string(x"FFFFFFFD") & " but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"D"
+			report "Expected write #22 in except test to be " & to_hex_string(32x"D") & " indicating trap, but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = x"FFFFFFFC"
+			report "Expected write #23 in except test to be " & to_hex_string(x"FFFFFFFC") & " but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"8"
+			report "Expected write #24 in except test to be " & to_hex_string(32x"8") & " indicating syscall, but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = x"FFFFFFFC"
+			report "Expected write #25 in except test to be " & to_hex_string(x"FFFFFFFC") & " but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"D"
+			report "Expected write #26 in except test to be " & to_hex_string(32x"D") & " indicating trap, but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"3"
+			report "Expected write #27 in except test to be " & to_hex_string(32x"3") & " but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"D"
+			report "Expected write #28 in except test to be " & to_hex_string(32x"D") & " indicating trap, but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"1"
+			report "Expected write #29 in except test to be " & to_hex_string(32x"1") & " but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"D"
+			report "Expected write #30 in except test to be " & to_hex_string(32x"D") & " indicating trap, but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"1"
+			report "Expected write #31 in except test to be " & to_hex_string(32x"1") & " but got " & to_hex_string(writeData)
+			severity error;
+		wait until we = '1';
+		assert writeData = 32x"8"
+			report "Expected write #32 in except test to be " & to_hex_string(32x"8") & " indicating syscall, but got " & to_hex_string(writeData)
+			severity error;
+		wait until clk = '0';
 		assert FALSE
 			report "End of testbench"
 			severity failure;
