@@ -111,7 +111,7 @@ F_reg : process (clk) is begin
 				when "100000" | "110000" => PC <= PC;
 				when "000000" => PC <= PCPlus4F;
 				when "010000" => PC <= PCBranchD;
-				when others => PC <= x"80000180";
+				when others => PC <= '1' & std_logic_vector(to_unsigned(16#180#, BIT_DEPTH - 1));
 			end case;
 		end if;
 	end if;

@@ -118,7 +118,7 @@ end process;
 
 PCBranch_proc : process(Opcode, Funct, Instruction, PCPlus4, ImmOut, CmpData1, RsDest, EPC) is begin
 	case Opcode is
-		when "000010" | "000011" => PCBranch <= PCPlus4(BIT_DEPTH - 1 downto 28) & Instruction (25 downto 0) & "00";
+		when "000010" | "000011" => PCBranch <= PCPlus4(BIT_DEPTH - 1 downto minimum(28, BIT_DEPTH - 1)) & Instruction (minimum(25, BIT_DEPTH - 4) downto 0) & "00";
 		when "010000" => --COP0
 			case RsDest is
 				when "10000" =>

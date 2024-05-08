@@ -87,12 +87,12 @@ begin
 
 mem_proc : process (addr, mem_data, except_handler) is begin
 	case addr(BIT_DEPTH - 1 downto 10) is
-		when x"00000" & "00" =>
+		when std_logic_vector(to_unsigned(0, BIT_DEPTH - 10)) =>
 			d_out <= mem_data(to_integer(unsigned(std_logic_vector'(addr(9 downto 2) & "00"))))&
 					mem_data(to_integer(unsigned(std_logic_vector'(addr(9 downto 2) & "01"))))&
 					mem_data(to_integer(unsigned(std_logic_vector'(addr(9 downto 2) & "10"))))&
 					mem_data(to_integer(unsigned(std_logic_vector'(addr(9 downto 2) & "11"))));
-		when x"80000" & "00" =>
+		when '1' & std_logic_vector(to_unsigned(0, BIT_DEPTH - 11)) =>
 			if addr(9 downto 7) = "011" then
 				d_out <= except_handler(to_integer(unsigned(std_logic_vector'(addr(6 downto 2) & "00"))))&
 						except_handler(to_integer(unsigned(std_logic_vector'(addr(6 downto 2) & "01"))))&
