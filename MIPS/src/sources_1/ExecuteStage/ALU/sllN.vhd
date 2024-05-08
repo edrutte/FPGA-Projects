@@ -23,6 +23,6 @@ begin
 end generate generateSLL;
 
 Y <= (others => '0') when
-	 (to_integer(unsigned(SHIFT_AMT)) > 32) else aSLL(to_integer(unsigned(SHIFT_AMT)));
+	 (to_integer(unsigned(SHIFT_AMT)) >= N) else aSLL(to_integer(unsigned(SHIFT_AMT)));
 
 end behavioral;

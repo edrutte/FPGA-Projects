@@ -23,5 +23,5 @@ begin
 end generate generateSRL;
 
 Y <= (others => '0') when
-	 (to_integer(unsigned(SHIFT_AMT)) > 32) else aSRL(to_integer(unsigned(SHIFT_AMT)));
+	 (to_integer(unsigned(SHIFT_AMT)) >= N) else aSRL(to_integer(unsigned(SHIFT_AMT)));
 end behavioral;
