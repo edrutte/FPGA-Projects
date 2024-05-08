@@ -18,7 +18,7 @@ architecture SomeRandomName of Adder is
 
 signal carries : std_logic_vector (BIT_DEPTH - 1 downto 0) := (others => '0');
 signal OpB : std_logic_vector (BIT_DEPTH - 1 downto 0) := (others => '0');
-signal SumTmp : std_logic_vector (BIT_DEPTH downto 0) := (others => '0');
+signal SumTmp : std_logic_vector (BIT_DEPTH - 1 downto 0) := (others => '0');
 begin
 
 	struct_gen : if USE_STRUCTURAL_ARCH generate
@@ -40,9 +40,9 @@ begin
 	dsp_gen : if not USE_STRUCTURAL_ARCH generate
 		subadd_proc : process(A, B, OP) is begin
 			if OP = '1' then
-				SumTmp <= std_logic_vector(resize(signed(A), BIT_DEPTH + 1) - resize(signed(B), BIT_DEPTH + 1));
+				SumTmp <= std_logic_vector(signed(A) - signed(B));
 			else
-				SumTmp <= std_logic_vector(resize(signed(A), BIT_DEPTH + 1) + resize(signed(B), BIT_DEPTH + 1));
+				SumTmp <= std_logic_vector(signed(A) + signed(B));
 			end if;
 		end process;
 		Sum <= SumTmp(BIT_DEPTH - 1 downto 0);

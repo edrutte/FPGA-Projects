@@ -20,7 +20,7 @@ end Execute;
 
 architecture SomeRandomName of Execute is
 
-signal ALUResult_tmp, Hi_tmp : std_logic_vector (31 downto 0);
+signal ALUResult_tmp, Hi_tmp : std_logic_vector (BIT_DEPTH - 1 downto 0);
 
 begin
 

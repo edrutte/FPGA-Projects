@@ -23,6 +23,6 @@ begin
 end generate generateSRA;
 
 Y <= (others => '0') when
-	 (to_integer(unsigned(SHIFT_AMT)) > 32) else aSRA(to_integer(unsigned(SHIFT_AMT)));
+	 (to_integer(unsigned(SHIFT_AMT)) >= N) else aSRA(to_integer(unsigned(SHIFT_AMT)));
 
 end behavioral;

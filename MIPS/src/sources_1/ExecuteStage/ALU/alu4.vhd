@@ -73,7 +73,7 @@ begin
 		 sll_result when "1100",
 		 srl_result when "1101",
 		 sra_result when "1110",
-		 x"00000000" when others;
+		 std_logic_vector(to_unsigned(0, BIT_DEPTH)) when others;
 
 	Hi <= hi_result when OP = "0110" or OP = "0111" else (others => '0');
 

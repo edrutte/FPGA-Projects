@@ -133,7 +133,7 @@ PCBranch_proc : process(Opcode, Funct, Instruction, PCPlus4, ImmOut, CmpData1, R
 				when "001000" | "001001" => PCBranch <= CmpData1;
 				when others => PCBranch <= (others => '0');
 			end case;
-		when others => PCBranch <= std_logic_vector(signed(unsigned(PCPlus4)) + signed(ImmOut(15 downto 0) & "00"));
+		when others => PCBranch <= std_logic_vector(signed(unsigned(PCPlus4)) + signed(ImmOut(minimum(15, BIT_DEPTH - 3) downto 0) & "00"));
 	end case;
 end process;
 
